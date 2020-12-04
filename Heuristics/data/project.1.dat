@@ -1,0 +1,30 @@
+ nLocations = 5;
+ nCities    = 8;
+ nTypes     = 3;
+
+ p            = [5 3 6 1 2 2 3 1]; // population for each city
+ posCities    = [[1 1] [2 3] [4 1] [1 2] [2 2] [0 1] [3 4] [2 4]]; // [x,y]
+ posLocations = [[2 3] [1 2] [1 1] [0 2] [1 3]];                  // [x,y]
+
+ d_city = [2  4  7];
+ cap    = [18 14  5];
+ cost   = [50 45 15];
+
+ d_center = 1.2;
+
+
+// solution (optimal) with objective 90
+//
+// Location 1 has a center of type 2. It serves 11 inhabitants, max is 14.
+// Location 2 has a center of type 2. It serves 12 inhabitants, max is 14.
+//
+// Locations 1 and 2 are used and distance is 1.414213562. Min is 1.2.
+//
+// City 1 is served by center at location 1 (distance 2.236067977, max is 4).
+// City 2 is served by center at location 2 (distance 1.414213562, max is 4).
+// City 3 is served by center at location 2 (distance 3.16227766, max is 4).
+// City 4 is served by center at location 1 (distance 1.414213562, max is 4).
+// City 5 is served by center at location 1 (distance 1, max is 4).
+// City 6 is served by center at location 1 (distance 2.828427125, max is 4).
+// City 7 is served by center at location 2 (distance 2.828427125, max is 4).
+// City 8 is served by center at location 1 (distance 1, max is 4).

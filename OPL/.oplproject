@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="ASCII"?><project>
+	<version>1.0</version>
+	<configs>
+		<config default="true" name="cfg1" category="opl">
+			<ref name="project.template.mod" type="model">
+			</ref>
+			<ref name="project.1.dat" type="data">
+			</ref>
+		</config>
+		<config default="false" name="cfg2" category="opl">
+			<ref name="project.template.mod" type="model">
+			</ref>
+			<ref name="project.2.dat" type="data">
+			</ref>
+		</config>
+	</configs>
+	
+</project>
