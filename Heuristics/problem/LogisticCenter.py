@@ -1,5 +1,6 @@
 import math
 
+
 class LogisticCenter(object):
     def __init__(self, maxCap, workingDistance, installationCost):
         self.type = None
@@ -39,9 +40,9 @@ class LogisticCenter(object):
         yCenter = self.locationAssigned.getY()
 
         if self.type == 'Primary':
-            return math.sqrt(math.pow(xCity - xCenter) + math.pow(yCity - yCenter)) <= self.workingDistance
+            return math.sqrt(math.pow(xCity - xCenter, 2) + math.pow(yCity - yCenter, 2)) <= self.workingDistance
         else:
-            return math.sqrt(math.pow(xCity - xCenter) + math.pow(yCity - yCenter)) <= 3 * self.workingDistance
+            return math.sqrt(math.pow(xCity - xCenter, 2) + math.pow(yCity - yCenter, 2)) <= 3 * self.workingDistance
 
     def __str__(self):
         return "Center: type %s pos (%d, %d)" % (self.type, self.locationAssigned.getX(), self.locationAssigned.getY())
