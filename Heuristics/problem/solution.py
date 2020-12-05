@@ -30,21 +30,24 @@ class Assignment(object):
         self.highestLoad = highestLoad
 
     def __str__(self):
-        return "<t_%d, c_%d>: highestLoad: %.2f%%" % (self.taskId, self.cpuId, self.highestLoad*100)
+        return "<t_%d, c_%d>: highestLoad: %.2f%%" % (self.taskId, self.cpuId, self.highestLoad * 100)
 
 
 # Solution includes functions to manage the solution, to perform feasibility
 # checks and to dump the solution into a string or file.
 class Solution(_Solution):
-    def __init__(self, tasks, cpus, capacityPerCPUId):
-        self.tasks = tasks
-        self.cpus = cpus
-        self.taskIdToCPUId = {}  # hash table: task Id => CPU Id
-        self.cpuIdToListTaskId = {}  # hash table: CPU Id => list<task Id>
-        # vector of available capacities per CPU initialized as a copy of maxCapacityPerCPUId vector.
-        self.availCapacityPerCPUId = copy.deepcopy(capacityPerCPUId)
-        # vector of loads per CPU (nCPUs entries initialized to 0.0) 
-        self.loadPerCPUId = [0.0] * len(cpus)
+    def __init__(self, cities, locations, types, compatible_locations, cl_distances):
+        self.cities = cities
+        self.locations = locations
+        self.types = types
+        self.compatible_locations = compatible_locations
+        self.cl_distances = cl_distances
+
+        self.locations_used = []  # add to this list locations that are used
+        self.location_used_to_center_type = {}  # location Id -> center type Id
+        # for each city define its primary and secondary centers
+        self.cities_centers = [{'primary': None, 'secondary': None}] * len(self.cities)
+
         super().__init__()
 
     def updateHighestLoad(self):
@@ -77,7 +80,7 @@ class Solution(_Solution):
         return self.taskIdToCPUId[taskId]
 
     def assign(self, taskId, cpuId):
-        if not self.isFeasibleToAssignTaskToCPU(taskId, cpuId):return False
+        if not self.isFeasibleToAssignTaskToCPU(taskId, cpuId): return False
 
         self.taskIdToCPUId[taskId] = cpuId
         if cpuId not in self.cpuIdToListTaskId: self.cpuIdToListTaskId[cpuId] = []
