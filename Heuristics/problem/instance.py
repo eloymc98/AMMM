@@ -21,6 +21,7 @@ from Heuristics.problem.LogisticCenter import LogisticCenter
 from Heuristics.problem.City import City
 from Heuristics.problem.Location import Location
 from Heuristics.problem.solution import Solution
+from Heuristics.problem.Type import Type
 
 
 class Instance(object):
@@ -40,20 +41,21 @@ class Instance(object):
         cap = inputData.cap
         cost = inputData.cost
 
-        d_center = inputData.d_center
+        self.d_center = inputData.d_center
 
         self.locations = [None] * nLocations
-        print(posLocations)
         for i, location in enumerate(posLocations):
             self.locations[i] = Location(location[0], location[1])
 
-        # self.cities = [None] * nCities
-        # for cId in range(0, nCities):
-        #     self.cities[cId] = City(tId, rt[tId])  # TODO: Set location, population
-        #
-        # self.types = [None] * nTypes  # vector with tasks
-        # for cId in range(0, nTypes):  # tId = 0..(nTasks-1)
-        #     self.types[cId] =  # TODO: Set type
+        self.cities = [None] * nCities
+        for i in range(posCities):
+            x = posCities[i][0]
+            y = posCities[i][1]
+            self.cities[i] = City(Location(x, y), p[i])
+
+        self.types = [None] * nTypes
+        for i in range(nTypes):
+            self.types[i] = Type(d_city[i], cap[i], cost[i])
 
     def getNumLocations(self):
         return len(self.locations)
