@@ -50,7 +50,7 @@ class Instance(object):
         cap = inputData.cap
         cost = inputData.cost
 
-        self.d_center = inputData.d_center
+        d_center = inputData.d_center
 
         self.locations = [None] * nLocations
         for i, location in enumerate(posLocations):
@@ -73,7 +73,7 @@ class Instance(object):
 
         for i in range(nLocations):
             for j in range(nLocations):
-                if i != j and distance(self.locations[i], self.locations[j], self.d_center):
+                if i != j and distance(self.locations[i], self.locations[j], d_center):
                     self.distance_l1l2[i].append(j)
 
         # Get distance between locations and cities
@@ -108,11 +108,9 @@ class Instance(object):
         return self.distance_cl
 
     def createSolution(self):
-        # TODO: implement if necessary
-        # solution = Solution(self.tasks, self.cpus, self.rc)
-        # solution.setVerbose(self.config.verbose)
-        # return solution
-        pass
+        solution = Solution(self.cities, self.locations, self.types, self.distance_l1l2, self.distance_cl)
+        solution.setVerbose(self.config.verbose)
+        return solution
 
     def checkInstance(self):
         # TODO: implement if necessary
