@@ -30,20 +30,30 @@ class Instance(object):
         nLocations = inputData.nLocations
         nCities = inputData.nCities
         nTypes = inputData.nTypes
-        rt = inputData.rt
-        self.rc = inputData.rc
+
+        p = inputData.p
+        posCities = inputData.posCities
+
+        posLocations = inputData.posLocations
+
+        d_city = inputData.d_city
+        cap = inputData.cap
+        cost = inputData.cost
+
+        d_center = inputData.d_center
 
         self.locations = [None] * nLocations
-        for lId in range(0, nLocations):
-            self.locations[lId] = Location(x, y) #TODO: Set X, Y
+        print(posLocations)
+        for i, location in enumerate(posLocations):
+            self.locations[i] = Location(location[0], location[1])
 
-        self.cities = [None] * nCities
-        for cId in range(0, nCities):
-            self.cities[cId] = City(tId, rt[tId]) #TODO: Set location, population
-
-        self.types = [None] * nTypes  # vector with tasks
-        for cId in range(0, nTypes):  # tId = 0..(nTasks-1)
-            self.types[cId] =  # TODO: Set type
+        # self.cities = [None] * nCities
+        # for cId in range(0, nCities):
+        #     self.cities[cId] = City(tId, rt[tId])  # TODO: Set location, population
+        #
+        # self.types = [None] * nTypes  # vector with tasks
+        # for cId in range(0, nTypes):  # tId = 0..(nTasks-1)
+        #     self.types[cId] =  # TODO: Set type
 
     def getNumLocations(self):
         return len(self.locations)
