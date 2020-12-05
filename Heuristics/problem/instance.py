@@ -16,12 +16,21 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
+import math
 
 from Heuristics.problem.LogisticCenter import LogisticCenter
 from Heuristics.problem.City import City
 from Heuristics.problem.Location import Location
 from Heuristics.problem.solution import Solution
 from Heuristics.problem.Type import Type
+
+
+def distance(l1, l2, min_dist=None):
+    d = math.sqrt(math.pow(l1.getX() - l2.getX(), 2) + math.pow(l1.getY() - l2.getY(), 2))
+    if min_dist is not None:
+        return d >= min_dist
+    else:
+        return d
 
 
 class Instance(object):
@@ -57,6 +66,26 @@ class Instance(object):
         for i in range(nTypes):
             self.types[i] = Type(d_city[i], cap[i], cost[i])
 
+        # Get locations that are at distance >= d_center
+        self.distance_l1l2 = [None] * nLocations
+        for i in range(nLocations):
+            self.distance_l1l2[i] = []
+
+        for i in range(nLocations):
+            for j in range(nLocations):
+                if i != j and distance(self.locations[i], self.locations[j], self.d_center):
+                    self.distance_l1l2[i].append(j)
+
+        # Get distance between locations and cities
+        self.distance_cl = [None] * nCities
+        for i in range(nCities):
+            self.distance_cl[i] = [None] * nLocations
+
+        for i in range(nCities):
+            for j in range(nLocations):
+                d = distance(self.cities[i].getLocation(), self.locations[j])
+                self.distance_cl[i][j] = d
+
     def getNumLocations(self):
         return len(self.locations)
 
@@ -72,23 +101,19 @@ class Instance(object):
     def getTypes(self):
         return self.types
 
+    def get_locations_at_min_distance(self):
+        return self.distance_l1l2
+
+    def get_cities_locations_distance(self):
+        return self.distance_cl
+
     def createSolution(self):
-        solution = Solution(self.tasks, self.cpus, self.rc)
-        solution.setVerbose(self.config.verbose)
-        return solution
+        # TODO: implement if necessary
+        # solution = Solution(self.tasks, self.cpus, self.rc)
+        # solution.setVerbose(self.config.verbose)
+        # return solution
+        pass
 
     def checkInstance(self):
-        totalCapacityCPUs = 0.0
-        maxCPUCapacity = 0.0
-        for cpu in self.cpus:
-            capacity = cpu.getTotalCapacity()
-            totalCapacityCPUs += capacity
-            maxCPUCapacity = max(maxCPUCapacity, capacity)
-
-        totalResourcesTasks = 0.0
-        for task in self.tasks:
-            resources = task.getTotalResources()
-            totalResourcesTasks += resources
-            if resources > maxCPUCapacity: return False
-
-        return totalCapacityCPUs >= totalResourcesTasks
+        # TODO: implement if necessary
+        return True
