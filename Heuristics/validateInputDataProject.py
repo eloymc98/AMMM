@@ -61,6 +61,8 @@ class ValidateInputData(object):
 
         # Validate posCities
         data.posCities = list(data.posCities)
+        for i, v in enumerate(data.posCities):
+            data.posCities[i] = list(data.posCities[i])
         posCities = data.posCities
         if len(posCities) != nCities:
             raise AMMMException('Size of posCities(%d) does not match with value of nCities(%d).' % (len(p), nCities))
@@ -74,6 +76,8 @@ class ValidateInputData(object):
 
         # Validate posLocations
         data.posLocations = list(data.posLocations)
+        for i, v in enumerate(data.posLocations):
+            data.posLocations[i] = list(data.posLocations[i])
         posLocations = data.posLocations
         if len(posLocations) != nLocations:
             raise AMMMException(
