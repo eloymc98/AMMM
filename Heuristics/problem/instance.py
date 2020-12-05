@@ -17,8 +17,9 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from Heuristics.problem.Task import Task
-from Heuristics.problem.CPU import CPU
+from Heuristics.problem.LogisticCenter import LogisticCenter
+from Heuristics.problem.City import City
+from Heuristics.problem.Location import Location
 from Heuristics.problem.solution import Solution
 
 
@@ -32,25 +33,32 @@ class Instance(object):
         rt = inputData.rt
         self.rc = inputData.rc
 
-        self.tasks = [None] * nTasks  # vector with tasks
-        for tId in range(0, nTasks):  # tId = 0..(nTasks-1)
-            self.tasks[tId] = Task(tId, rt[tId])
+        self.locations = [None] * nLocations
+        for lId in range(0, nLocations):
+            self.locations[lId] = Location(x, y) #TODO: Set X, Y
 
-        self.cpus = [None] * nCPUs  # vector with cpus
-        for cId in range(0, nCPUs):  # cId = 0..(nCPUs-1)
-            self.cpus[cId] = CPU(cId, self.rc[cId])
+        self.cities = [None] * nCities
+        for cId in range(0, nCities):
+            self.cities[cId] = City(tId, rt[tId]) #TODO: Set location, population
 
-    def getNumTasks(self):
-        return len(self.tasks)
+        self.types = [None] * nTypes  # vector with tasks
+        for cId in range(0, nTypes):  # tId = 0..(nTasks-1)
+            self.types[cId] =  # TODO: Set type
 
-    def getNumCPUs(self):
-        return len(self.cpus)
+    def getNumLocations(self):
+        return len(self.locations)
 
-    def getTasks(self):
-        return self.tasks
+    def getNumCities(self):
+        return len(self.cities)
 
-    def getCPUs(self):
-        return self.cpus
+    def getCities(self):
+        return self.cities
+
+    def getLocations(self):
+        return self.locations
+
+    def getTypes(self):
+        return self.types
 
     def createSolution(self):
         solution = Solution(self.tasks, self.cpus, self.rc)

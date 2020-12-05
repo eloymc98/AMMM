@@ -28,7 +28,7 @@ from AMMMGlobals import AMMMException
 # A new solution can be created based on an existing solution and a list of
 # changes using the createNeighborSolution(solution, moves) function.
 class Move(object):
-    def __init__(self, taskId, curCPUId, newCPUId):
+    def __init__(self, taskId, curCPUId, newCPUId): #TODO: Change parameters function
         self.taskId = taskId
         self.curCPUId = curCPUId
         self.newCPUId = newCPUId
