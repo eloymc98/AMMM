@@ -48,7 +48,7 @@ class Instance(object):
             self.locations[i] = Location(location[0], location[1])
 
         self.cities = [None] * nCities
-        for i in range(posCities):
+        for i in range(nCities):
             x = posCities[i][0]
             y = posCities[i][1]
             self.cities[i] = City(Location(x, y), p[i])
