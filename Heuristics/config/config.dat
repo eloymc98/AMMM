@@ -1,7 +1,7 @@
 # --- Common specific parameters ------------------------------------------------------------------------------
 inputDataFile        = data/project.1.dat;        # Input DAT file
 solutionFile         = solutions/project_1.sol;   # Output DAT file (solution)
-solver               = Greedy;                  # Supported solvers: Greedy / Random / GRASP / BRKGA
+solver               = Greedy;                  # Supported solvers: Greedy / GRASP
 maxExecTime          = 300;                      # Maximum execution time in seconds
 verbose              = True;                    # Verbose mode?
 
@@ -16,10 +16,3 @@ alpha                = 1;                 # Alpha parameter for the GRASP solver
 localSearch          = False;                # Enable local search?
 neighborhoodStrategy = TaskExchange;        # Supported Neighborhoods: TaskExchange
 policy               = BestImprovement;    # Supported Policies: FirstImprovement / BestImprovement
-
-# --- BRKGA specific parameters -------------------------------------------------------------------------------
-# Ignored if solver is not BRKGA.
-eliteProp                = 0.15;                  # Proportion of elite individuals in the population.
-mutantProp               = 0.1;                   # Proportion of mutant individuals in the population.
-inheritanceProb          = 0.7;                   # Probability of inherit a gene from the elite parent.
-IndividualsMultiplier    = 1.0;                   # Multiplier to compute the number of individuals
