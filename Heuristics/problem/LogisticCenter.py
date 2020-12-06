@@ -2,13 +2,11 @@ import math
 
 
 class LogisticCenter(object):
-    def __init__(self, id, maxCap, workingDistance, installationCost):
+    def __init__(self, id, workingDistanceType):
         self.id = id
         self.type = None
-        self.maxCap = maxCap
         self.locationAssigned = None
-        self.workingDistance = workingDistance
-        self.installationCost = installationCost
+        self.workingDistanceType = workingDistanceType
 
     def getType(self):
         return self.type
@@ -16,37 +14,34 @@ class LogisticCenter(object):
     def getId(self):
         return self.id
 
-    def getMaxCap(self):
-        return self.maxCap
-
     def getLocationAssigned(self):
         return self.locationAssigned
 
-    def getWorkingDistance(self):
-        return self.workingDistance
-
-    def getInstallationCost(self):
-        return self.installationCost
+    def getWorkingDistanceType(self):
+        return self.workingDistanceType
 
     def setType(self, type):
         self.type = type
+
+    def set_working_distance_type(self, workingDistanceType):
+        self.workingDistanceType = workingDistanceType
 
     def setLocationAssigned(self, locationAssigned):
         self.locationAssigned = locationAssigned
 
     def isInWorkingDistance(self, locationCity):
-        if self.locationAssigned == None:
+        if self.locationAssigned is None:
             return False
 
-        xCity = locationCity.getX()
-        yCity = locationCity.getY()
+        xCity = locationCity.getLocation().getX()
+        yCity = locationCity.getLocation().getX()
         xCenter = self.locationAssigned.getX()
         yCenter = self.locationAssigned.getY()
 
-        if self.type == 'Primary':
-            return math.sqrt(math.pow(xCity - xCenter, 2) + math.pow(yCity - yCenter, 2)) <= self.workingDistance
+        if self.workingDistanceType == 'Primary':
+            return math.sqrt(math.pow(xCity - xCenter, 2) + math.pow(yCity - yCenter, 2)) <= self.getType().get_d_city()
         else:
-            return math.sqrt(math.pow(xCity - xCenter, 2) + math.pow(yCity - yCenter, 2)) <= 3 * self.workingDistance
+            return math.sqrt(math.pow(xCity - xCenter, 2) + math.pow(yCity - yCenter, 2)) <= 3 * self.getType().get_d_city()
 
     def __str__(self):
         return "Center: type %s pos (%d, %d)" % (self.type, self.locationAssigned.getX(), self.locationAssigned.getY())

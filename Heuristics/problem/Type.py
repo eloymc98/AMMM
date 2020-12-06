@@ -1,11 +1,15 @@
 class Type(object):
-    def __init__(self, d_city, cap, cost):
+    def __init__(self, id_type, d_city, cap, cost):
+        self.id_type = id_type
         self.d_city = d_city
         self.cap = cap
         self.cost = cost
 
     def get_d_city(self):
         return self.d_city
+
+    def get_id_type(self):
+        return self.id_type
 
     def get_capacity(self):
         return self.cap

@@ -62,7 +62,7 @@ class Instance(object):
 
         self.types = [None] * nTypes
         for i in range(nTypes):
-            self.types[i] = Type(d_city[i], cap[i], cost[i])
+            self.types[i] = Type(i, d_city[i], cap[i], cost[i])
 
         # Get locations that are at distance >= d_center
         self.distance_l1l2 = [None] * nLocations
@@ -78,6 +78,11 @@ class Instance(object):
         self.distance_cl = [None] * nCities
         for i in range(nCities):
             self.distance_cl[i] = [None] * nLocations
+
+        for i in range(nCities):
+            for j in range(nLocations):
+                d = distance(self.cities[i].getLocation(), self.locations[j])
+                self.distance_cl[i][j] = d
 
         for i in range(nCities):
             for j in range(nLocations):
