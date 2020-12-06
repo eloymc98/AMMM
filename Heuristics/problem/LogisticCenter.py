@@ -2,7 +2,8 @@ import math
 
 
 class LogisticCenter(object):
-    def __init__(self, maxCap, workingDistance, installationCost):
+    def __init__(self, id, maxCap, workingDistance, installationCost):
+        self.id = id
         self.type = None
         self.maxCap = maxCap
         self.locationAssigned = None
@@ -11,6 +12,9 @@ class LogisticCenter(object):
 
     def getType(self):
         return self.type
+
+    def getId(self):
+        return self.id
 
     def getMaxCap(self):
         return self.maxCap

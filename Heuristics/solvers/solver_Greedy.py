@@ -38,16 +38,15 @@ class Solver_Greedy(_Solver):
         solution = self.instance.createSolution()
 
         # get tasks and sort them by their total required resources in descending order
-        tasks = self.instance.getTasks()
-        sortedTasks = sorted(tasks, key=lambda t: t.getTotalResources(), reverse=True)
+        posibleLocations = self.instance.get_locations_at_min_distance()
+        sortedLocations = sorted(posibleLocations, key=lambda t: t.getTotalResources(), reverse=True)
 
 
         # for each task taken in sorted order
-        for task in sortedTasks:
-            taskId = task.getId()
+        for location in sortedLocations:
 
             # compute feasible assignments
-            candidateList = solution.findFeasibleAssignments(taskId)
+            candidateList = solution.findFeasibleAssignments(location)
 
             # no candidate assignments => no feasible assignment found
             if not candidateList:

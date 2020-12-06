@@ -1,7 +1,11 @@
 class City(object):
-    def __init__(self, location, population):
+    def __init__(self, id, location, population):
+        self.id = id
         self.location = location
         self.population = population
+
+    def getId(self):
+        return self.id
 
     def getLocation(self):
         return self.location

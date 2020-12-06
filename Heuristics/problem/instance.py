@@ -17,8 +17,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 import math
-
-from Heuristics.problem.LogisticCenter import LogisticCenter
 from Heuristics.problem.City import City
 from Heuristics.problem.Location import Location
 from Heuristics.problem.solution import Solution
@@ -60,7 +58,7 @@ class Instance(object):
         for i in range(nCities):
             x = posCities[i][0]
             y = posCities[i][1]
-            self.cities[i] = City(Location(x, y), p[i])
+            self.cities[i] = City(i, Location(x, y), p[i])
 
         self.types = [None] * nTypes
         for i in range(nTypes):
