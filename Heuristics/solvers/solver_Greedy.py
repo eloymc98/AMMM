@@ -37,11 +37,6 @@ class Solver_Greedy(_Solver):
         # get an empty solution for the problem
         solution = self.instance.createSolution()
 
-        locations = self.instance.getLocations()
-        compatible_locations = self.instance.get_locations_at_min_distance()
-
-        cities = self.instance.getCities()
-
         while True:
             # get best assignment (cheapest one)
             candidate_with_min_cost = solution.findBestFeasibleAssignment()
@@ -53,28 +48,6 @@ class Solver_Greedy(_Solver):
 
             # assign the current task to the CPU that resulted in a minimum highest load
             solution.assign(candidate_with_min_cost.c_id, candidate.cpuId)
-
-        # get tasks and sort them by their total required resources in descending order
-        # tasks = self.instance.getTasks()
-        # sortedTasks = sorted(tasks, key=lambda t: t.getTotalResources(), reverse=True)
-
-        # # for each task taken in sorted order
-        # for task in sortedTasks:
-        #     taskId = task.getId()
-        #
-        #     # compute feasible assignments
-        #     candidateList = solution.findFeasibleAssignments(taskId)
-        #
-        #     # no candidate assignments => no feasible assignment found
-        #     if not candidateList:
-        #         solution.makeInfeasible()
-        #         break
-        #
-        #     # select assignment
-        #     candidate = self._selectCandidate(candidateList)
-        #
-        #     # assign the current task to the CPU that resulted in a minimum highest load
-        #     solution.assign(taskId, candidate.cpuId)
 
         return solution
 

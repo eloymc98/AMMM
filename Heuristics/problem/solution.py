@@ -28,6 +28,7 @@ class Assignment(object):
         self.type = type
         self.city = city
         self.is_primary = is_primary
+        self.cost = float('infinity')
 
     def __str__(self):
         return "<c_%d, l_%d, t_%d>: %s center" % (
@@ -38,14 +39,14 @@ class Assignment(object):
 # checks and to dump the solution into a string or file.
 class Solution(_Solution):
     def __init__(self, cities, locations, types, compatible_locations, cl_distances):
+        self.cost = 0.0
         self.cities = cities
         self.locations = locations
         self.types = types
         self.compatible_locations = compatible_locations
         self.cl_distances = cl_distances
 
-        self.locations_used = []  # add to this list locations that are used. tuple (l_id, t_id)
-        self.location_used_to_center_type = {}  # location Id -> center type Id
+        self.locations_used = {}  # add to this dict locations that are used. key: l_id , value: t_id
         # for each city define its primary and secondary centers
         self.cities_centers = [{'primary': None, 'secondary': None}] * len(self.cities)
         self.loadPerCenter = {}
@@ -53,15 +54,8 @@ class Solution(_Solution):
 
         super().__init__()
 
-    def updateHighestLoad(self):
-        self.fitness = 0.0
-        for cpu in self.cpus:
-            cpuId = cpu.getId()
-            totalCapacity = cpu.getTotalCapacity()
-            usedCapacity = totalCapacity - self.availCapacityPerCPUId[cpuId]
-            load = usedCapacity / totalCapacity
-            self.loadPerCPUId[cpuId] = load
-            self.fitness = max(self.fitness, load)
+    def update_cost(self, assignment_cost):
+        self.cost += assignment_cost
 
     def isFeasibleToAssignCenterToCity(self, city, location, type, pc_or_sc):
 
@@ -84,14 +78,18 @@ class Solution(_Solution):
         # Check if location is compatible with locations already used
         if len(self.locations_used) > 0:
             flag = False
-            for l in self.locations_used:
-                if location.getId() in self.compatible_locations[l[0]]:
+            for k in self.locations_used.keys():
+                if location.getId() in self.compatible_locations[k]:
                     flag = True
                     break
             if not flag:
                 return False
 
-        if type.get_capacity() - self.usedPopulationPerCenter[location.getId()] < city.getPopulation():
+        if pc_or_sc == 'primary' and type.get_capacity() - self.usedPopulationPerCenter[
+            location.getId()] < city.getPopulation():
+            return False
+        elif pc_or_sc == 'secondary' and type.get_capacity() - self.usedPopulationPerCenter[
+            location.getId()] < 0.1 * city.getPopulation():
             return False
 
         return True
@@ -109,12 +107,22 @@ class Solution(_Solution):
     def assign(self, city, location, type, pc_or_sc):
         if not self.isFeasibleToAssignCenterToCity(city, location, type, pc_or_sc): return False
 
-        self.taskIdToCPUId[taskId] = cpuId
-        if cpuId not in self.cpuIdToListTaskId: self.cpuIdToListTaskId[cpuId] = []
-        self.cpuIdToListTaskId[cpuId].append(taskId)
-        self.availCapacityPerCPUId[cpuId] -= self.tasks[taskId].getTotalResources()
+        assignment_cost = 0
+        if self.locations_used.get(location.getId()) is None:
+            assignment_cost = type.get_cost()
+        elif self.locations_used[location.getId()] != type.get_id():
+            assignment_cost = type.get_cost() - self.locations_used[location.getId()].get_cost()
 
-        self.updateHighestLoad()
+        self.locations_used[location.getId()] = type.get_id()
+        self.cities_centers[city.getId()][pc_or_sc] = location.getId()
+
+        population = city.getPopulation() if pc_or_sc == 'primary' else 0.1 * city.getPopulation()
+        if self.usedPopulationPerCenter.get(location.getId()) is None:
+            self.usedPopulationPerCenter[location.getId()] = population
+        else:
+            self.usedPopulationPerCenter[location.getId()] += population
+
+        self.cost += assignment_cost
         return True
 
     def unassign(self, taskId, cpuId):
@@ -143,7 +151,7 @@ class Solution(_Solution):
         return feasibleAssignments
 
     def findBestFeasibleAssignment(self):
-        # bestAssignment = Assignment(taskId, None, float('infinity'))
+        bestAssignment = Assignment(None, None, None, None)
         for c in self.cities:
             for l in self.locations:
                 for t in self.types:
@@ -151,10 +159,13 @@ class Solution(_Solution):
                         feasible = self.assign(c, l, t, pc_or_sc)
                         if not feasible: continue
 
-                        curHighestLoad = self.fitness
-                        if bestAssignment.highestLoad > curHighestLoad:
-                            bestAssignment.cpuId = cpuId
-                            bestAssignment.highestLoad = curHighestLoad
+                        current_cost = self.cost
+                        if bestAssignment.cost > current_cost:
+                            bestAssignment.location = l
+                            bestAssignment.city = c
+                            bestAssignment.type = t
+                            bestAssignment.is_primary = True if pc_or_sc == 'primary' else False
+                            bestAssignment.cost = self.cost
 
                         self.unassign(taskId, cpuId)
 

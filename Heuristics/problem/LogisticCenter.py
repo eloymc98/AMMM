@@ -5,7 +5,7 @@ class LogisticCenter(object):
     def __init__(self, location, type):
         self.location = location
         self.type = type
-        self.cities_assigned =
+        self.cities_assigned = None
 
     def getType(self):
         return self.type
