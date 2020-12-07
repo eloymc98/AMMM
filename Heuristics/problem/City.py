@@ -9,5 +9,8 @@ class City(object):
     def getPopulation(self):
         return self.population
 
+    def getId(self):
+        return self.location.getId()
+
     def __str__(self):
         return "Location: (%d, %d)" % (self.x, self.y)

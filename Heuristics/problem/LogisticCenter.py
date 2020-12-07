@@ -2,18 +2,16 @@ import math
 
 
 class LogisticCenter(object):
-    def __init__(self, maxCap, workingDistance, installationCost):
-        self.type = None
-        self.maxCap = maxCap
-        self.locationAssigned = None
-        self.workingDistance = workingDistance
-        self.installationCost = installationCost
+    def __init__(self, location, type):
+        self.location = location
+        self.type = type
+        self.cities_assigned =
 
     def getType(self):
         return self.type
 
     def getMaxCap(self):
-        return self.maxCap
+        return self.type.get_capacity()
 
     def getLocationAssigned(self):
         return self.locationAssigned

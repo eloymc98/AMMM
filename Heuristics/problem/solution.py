@@ -21,16 +21,17 @@ import copy
 from Heuristics.solution import _Solution
 
 
-# This class stores the load of the highest loaded CPU
-# when a task is assigned to a CPU.
+# This class stores the location and center type that serves as primary/secondary center a given city.
 class Assignment(object):
-    def __init__(self, taskId, cpuId, highestLoad):
-        self.taskId = taskId
-        self.cpuId = cpuId
-        self.highestLoad = highestLoad
+    def __init__(self, location, type, city, is_primary):
+        self.location = location
+        self.type = type
+        self.city = city
+        self.is_primary = is_primary
 
     def __str__(self):
-        return "<t_%d, c_%d>: highestLoad: %.2f%%" % (self.taskId, self.cpuId, self.highestLoad * 100)
+        return "<c_%d, l_%d, t_%d>: %s center" % (
+            self.city.getId(), self.location.getId(), self.type.get_id(), 'Primary' if self.is_primary else 'Secondary')
 
 
 # Solution includes functions to manage the solution, to perform feasibility
@@ -43,10 +44,12 @@ class Solution(_Solution):
         self.compatible_locations = compatible_locations
         self.cl_distances = cl_distances
 
-        self.locations_used = []  # add to this list locations that are used
+        self.locations_used = []  # add to this list locations that are used. tuple (l_id, t_id)
         self.location_used_to_center_type = {}  # location Id -> center type Id
         # for each city define its primary and secondary centers
         self.cities_centers = [{'primary': None, 'secondary': None}] * len(self.cities)
+        self.loadPerCenter = {}
+        self.usedPopulationPerCenter = {}
 
         super().__init__()
 
@@ -60,11 +63,35 @@ class Solution(_Solution):
             self.loadPerCPUId[cpuId] = load
             self.fitness = max(self.fitness, load)
 
-    def isFeasibleToAssignTaskToCPU(self, taskId, cpuId):
-        if taskId in self.taskIdToCPUId:
+    def isFeasibleToAssignCenterToCity(self, city, location, type, pc_or_sc):
+
+        # Check if location is already used with another type
+        # if len(self.locations_used) > 0:
+        #     for l in self.locations_used:
+        #         if location.getId() == l[0] and type.get_id() != l[1]:
+        #             return False
+
+        if self.cities_centers[city.getId()][pc_or_sc] is not None:
+            # Check if this city has already been a assigned a primary/secondary center
+            return False
+        elif pc_or_sc == 'primary' and self.cl_distances[city.getId(), location.getId()] > type.get_d_city():
+            # Check if we want to make this location-type primary but distance constraint is not fulfilled
+            return False
+        elif pc_or_sc == 'secondary' and self.cl_distances[city.getId(), location.getId()] > 3 * type.get_d_city():
+            # Check if we want to make this location-type secondary but distance constraint is not fulfilled
             return False
 
-        if self.availCapacityPerCPUId[cpuId] < self.tasks[taskId].getTotalResources():
+        # Check if location is compatible with locations already used
+        if len(self.locations_used) > 0:
+            flag = False
+            for l in self.locations_used:
+                if location.getId() in self.compatible_locations[l[0]]:
+                    flag = True
+                    break
+            if not flag:
+                return False
+
+        if type.get_capacity() - self.usedPopulationPerCenter[location.getId()] < city.getPopulation():
             return False
 
         return True
@@ -79,8 +106,8 @@ class Solution(_Solution):
         if taskId not in self.taskIdToCPUId: return None
         return self.taskIdToCPUId[taskId]
 
-    def assign(self, taskId, cpuId):
-        if not self.isFeasibleToAssignTaskToCPU(taskId, cpuId): return False
+    def assign(self, city, location, type, pc_or_sc):
+        if not self.isFeasibleToAssignCenterToCity(city, location, type, pc_or_sc): return False
 
         self.taskIdToCPUId[taskId] = cpuId
         if cpuId not in self.cpuIdToListTaskId: self.cpuIdToListTaskId[cpuId] = []
@@ -100,11 +127,13 @@ class Solution(_Solution):
         self.updateHighestLoad()
         return True
 
-    def findFeasibleAssignments(self, taskId):
+    def findFeasibleAssignments(self):
         feasibleAssignments = []
-        for cpu in self.cpus:
-            cpuId = cpu.getId()
-            feasible = self.assign(taskId, cpuId)
+        for c in self.cities:
+            c_id = c.getId()
+            for l in self.locations:
+                l_id = l.getId()
+                feasible = self.assign(c_id, cpuId)
             if not feasible: continue
             assignment = Assignment(taskId, cpuId, self.fitness)
             feasibleAssignments.append(assignment)
@@ -113,19 +142,21 @@ class Solution(_Solution):
 
         return feasibleAssignments
 
-    def findBestFeasibleAssignment(self, taskId):
-        bestAssignment = Assignment(taskId, None, float('infinity'))
-        for cpu in self.cpus:
-            cpuId = cpu.getId()
-            feasible = self.assign(taskId, cpuId)
-            if not feasible: continue
+    def findBestFeasibleAssignment(self):
+        # bestAssignment = Assignment(taskId, None, float('infinity'))
+        for c in self.cities:
+            for l in self.locations:
+                for t in self.types:
+                    for pc_or_sc in ['primary', 'secondary']:
+                        feasible = self.assign(c, l, t, pc_or_sc)
+                        if not feasible: continue
 
-            curHighestLoad = self.fitness
-            if bestAssignment.highestLoad > curHighestLoad:
-                bestAssignment.cpuId = cpuId
-                bestAssignment.highestLoad = curHighestLoad
+                        curHighestLoad = self.fitness
+                        if bestAssignment.highestLoad > curHighestLoad:
+                            bestAssignment.cpuId = cpuId
+                            bestAssignment.highestLoad = curHighestLoad
 
-            self.unassign(taskId, cpuId)
+                        self.unassign(taskId, cpuId)
 
         return bestAssignment
 

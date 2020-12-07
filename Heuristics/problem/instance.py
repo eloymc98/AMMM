@@ -54,17 +54,17 @@ class Instance(object):
 
         self.locations = [None] * nLocations
         for i, location in enumerate(posLocations):
-            self.locations[i] = Location(location[0], location[1])
+            self.locations[i] = Location(location[0], location[1], i)
 
         self.cities = [None] * nCities
         for i in range(nCities):
             x = posCities[i][0]
             y = posCities[i][1]
-            self.cities[i] = City(Location(x, y), p[i])
+            self.cities[i] = City(Location(x, y, i), p[i])
 
         self.types = [None] * nTypes
         for i in range(nTypes):
-            self.types[i] = Type(d_city[i], cap[i], cost[i])
+            self.types[i] = Type(d_city[i], cap[i], cost[i], i)
 
         # Get locations that are at distance >= d_center
         self.distance_l1l2 = [None] * nLocations
