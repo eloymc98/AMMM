@@ -46,11 +46,13 @@ class Solution(_Solution):
         self.compatible_locations = compatible_locations
         self.cl_distances = cl_distances
 
-        self.locations_used = {}  # add to this dict locations that are used. key: l_id , value: t_id
+        self.locations_used = {}  # add to this dict locations that are used. key: l_id , value: type class
+
+        self.aux_locations_used = {}
         # for each city define its primary and secondary centers
-        self.cities_centers = [{'primary': None, 'secondary': None}] * len(self.cities)
-        self.loadPerCenter = {}
+        self.cities_centers = {}  # {c_id: {'primary': l1_id, 'secondary': l2_id}}
         self.usedPopulationPerCenter = {}
+        self.cities_served_per_each_location = {}  # key: location_id, value: [(city,primary/secondary)]
 
         super().__init__()
 
@@ -64,40 +66,71 @@ class Solution(_Solution):
         #     for l in self.locations_used:
         #         if location.getId() == l[0] and type.get_id() != l[1]:
         #             return False
+        if self.cities_centers.get(city.getId()) is not None:
+            if self.cities_centers[city.getId()].get(pc_or_sc) is not None:
+                # Check if this city has already been a assigned a primary/secondary center
+                return False
+            elif pc_or_sc == 'primary' and self.cities_centers[city.getId()].get('primary') is None and \
+                    self.cities_centers[city.getId()].get('secondary') == location.getId():
+                return False
+            elif pc_or_sc == 'secondary' and self.cities_centers[city.getId()].get('secondary') is None and \
+                    self.cities_centers[city.getId()].get('primary') == location.getId():
+                return False
 
-        if self.cities_centers[city.getId()][pc_or_sc] is not None:
-            # Check if this city has already been a assigned a primary/secondary center
-            return False
-        elif pc_or_sc == 'primary' and self.cl_distances[city.getId(), location.getId()] > type.get_d_city():
+        if pc_or_sc == 'primary' and self.cl_distances[city.getId()][location.getId()] > type.get_d_city():
             # Check if we want to make this location-type primary but distance constraint is not fulfilled
             return False
-        elif pc_or_sc == 'secondary' and self.cl_distances[city.getId(), location.getId()] > 3 * type.get_d_city():
+        elif pc_or_sc == 'secondary' and self.cl_distances[city.getId()][location.getId()] > 3 * type.get_d_city():
             # Check if we want to make this location-type secondary but distance constraint is not fulfilled
             return False
 
         # Check if location is compatible with locations already used
         if len(self.locations_used) > 0:
             flag = False
+            compatible_locations = []
             for k in self.locations_used.keys():
-                if location.getId() in self.compatible_locations[k]:
+                if location.getId() == k:
                     flag = True
                     break
+                if len(compatible_locations) == 0:
+                    compatible_locations = self.compatible_locations[k]
+                else:
+                    compatible_locations = list(set(compatible_locations) & set(self.compatible_locations[k]))
+
+            if location.getId() in compatible_locations:
+                flag = True
             if not flag:
                 return False
+        if self.usedPopulationPerCenter.get(location.getId()) is not None:
+            if pc_or_sc == 'primary' and type.get_capacity() - self.usedPopulationPerCenter[
+                location.getId()] < city.getPopulation():
+                return False
+            elif pc_or_sc == 'secondary' and type.get_capacity() - self.usedPopulationPerCenter[
+                location.getId()] < 0.1 * city.getPopulation():
+                return False
 
-        if pc_or_sc == 'primary' and type.get_capacity() - self.usedPopulationPerCenter[
-            location.getId()] < city.getPopulation():
-            return False
-        elif pc_or_sc == 'secondary' and type.get_capacity() - self.usedPopulationPerCenter[
-            location.getId()] < 0.1 * city.getPopulation():
-            return False
+        # If we change center type, we have to respect the distances of the cities that it serves as primary/secondary
+        # and its capacity
+        if self.locations_used.get(location.getId()) is not None:
+            old_type = self.locations_used[location.getId()]
+            if old_type.get_id() != type.get_id():
+                for value in self.cities_served_per_each_location[location.getId()]:
+                    if value[1] == 'primary' and self.cl_distances[value[0].getId()][
+                        location.getId()] > type.get_d_city():
+                        return False
+                    elif value[1] == 'secondary' and self.cl_distances[value[0].getId()][
+                        location.getId()] > 3 * type.get_d_city():
+                        return False
 
         return True
 
-    def isFeasibleToUnassignTaskFromCPU(self, taskId, cpuId):
-        if taskId not in self.taskIdToCPUId: return False
-        if cpuId not in self.cpuIdToListTaskId: return False
-        if taskId not in self.cpuIdToListTaskId[cpuId]: return False
+    def isFeasibleToUnassignCenterFromCity(self, city, location, type, pc_or_sc):
+        if self.locations_used.get(location.getId()) is None:
+            return False
+        if self.locations_used[location.getId()].get_id() != type.get_id():
+            return False
+        if self.cities_centers[city.getId()][pc_or_sc] != location.getId():
+            return False
         return True
 
     def getCPUIdAssignedToTaskId(self, taskId):
@@ -110,11 +143,18 @@ class Solution(_Solution):
         assignment_cost = 0
         if self.locations_used.get(location.getId()) is None:
             assignment_cost = type.get_cost()
-        elif self.locations_used[location.getId()] != type.get_id():
+            self.cities_served_per_each_location[location.getId()] = [(city, pc_or_sc)]
+        elif self.locations_used[location.getId()].get_id() != type.get_id():
             assignment_cost = type.get_cost() - self.locations_used[location.getId()].get_cost()
+            self.aux_locations_used[location.getId()] = self.locations_used[location.getId()]
+            self.cities_served_per_each_location[location.getId()].append((city, pc_or_sc))
 
-        self.locations_used[location.getId()] = type.get_id()
-        self.cities_centers[city.getId()][pc_or_sc] = location.getId()
+        self.locations_used[location.getId()] = type
+        if self.cities_centers.get(city.getId()) is not None:
+            self.cities_centers[city.getId()][pc_or_sc] = location.getId()
+        else:
+            self.cities_centers[city.getId()] = {}
+            self.cities_centers[city.getId()][pc_or_sc] = location.getId()
 
         population = city.getPopulation() if pc_or_sc == 'primary' else 0.1 * city.getPopulation()
         if self.usedPopulationPerCenter.get(location.getId()) is None:
@@ -125,30 +165,52 @@ class Solution(_Solution):
         self.cost += assignment_cost
         return True
 
-    def unassign(self, taskId, cpuId):
-        if not self.isFeasibleToUnassignTaskFromCPU(taskId, cpuId): return False
+    def unassign(self, city, location, type, pc_or_sc):
+        if not self.isFeasibleToUnassignCenterFromCity(city, location, type, pc_or_sc): return False
 
-        del self.taskIdToCPUId[taskId]
-        self.cpuIdToListTaskId[cpuId].remove(taskId)
-        self.availCapacityPerCPUId[cpuId] += self.tasks[taskId].getTotalResources()
+        assignment_cost = 0
+        if self.aux_locations_used.get(location.getId()) is not None:
+            assignment_cost = self.locations_used[location.getId()].get_cost() - self.aux_locations_used[
+                location.getId()].get_cost()
+            self.locations_used[location.getId()] = self.aux_locations_used[location.getId()]
+            del self.aux_locations_used[location.getId()]
+        else:
+            assignment_cost = self.locations_used[location.getId()].get_cost()
+            del self.locations_used[location.getId()]
 
-        self.updateHighestLoad()
+        if len(self.cities_served_per_each_location[location.getId()]) > 1:
+            try:
+                self.cities_served_per_each_location[location.getId()].remove((city, pc_or_sc))
+            except ValueError:
+                print(':(')
+        else:
+            del self.cities_served_per_each_location[location.getId()]
+
+        self.cities_centers[city.getId()][pc_or_sc] = None
+
+        population = city.getPopulation() if pc_or_sc == 'primary' else 0.1 * city.getPopulation()
+        if self.usedPopulationPerCenter.get(location.getId()) == population:
+            del self.usedPopulationPerCenter[location.getId()]
+        else:
+            self.usedPopulationPerCenter[location.getId()] -= population
+
+        self.cost -= assignment_cost
         return True
 
-    def findFeasibleAssignments(self):
-        feasibleAssignments = []
-        for c in self.cities:
-            c_id = c.getId()
-            for l in self.locations:
-                l_id = l.getId()
-                feasible = self.assign(c_id, cpuId)
-            if not feasible: continue
-            assignment = Assignment(taskId, cpuId, self.fitness)
-            feasibleAssignments.append(assignment)
-
-            self.unassign(taskId, cpuId)
-
-        return feasibleAssignments
+    # def findFeasibleAssignments(self):
+    #     feasibleAssignments = []
+    #     for c in self.cities:
+    #         c_id = c.getId()
+    #         for l in self.locations:
+    #             l_id = l.getId()
+    #             feasible = self.assign(c_id, cpuId)
+    #         if not feasible: continue
+    #         assignment = Assignment(taskId, cpuId, self.fitness)
+    #         feasibleAssignments.append(assignment)
+    #
+    #         self.unassign(taskId, cpuId)
+    #
+    #     return feasibleAssignments
 
     def findBestFeasibleAssignment(self):
         bestAssignment = Assignment(None, None, None, None)
@@ -167,7 +229,7 @@ class Solution(_Solution):
                             bestAssignment.is_primary = True if pc_or_sc == 'primary' else False
                             bestAssignment.cost = self.cost
 
-                        self.unassign(taskId, cpuId)
+                        self.unassign(c, l, t, pc_or_sc)
 
         return bestAssignment
 

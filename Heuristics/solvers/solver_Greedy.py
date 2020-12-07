@@ -37,7 +37,8 @@ class Solver_Greedy(_Solver):
         # get an empty solution for the problem
         solution = self.instance.createSolution()
 
-        while True:
+        assignments = 0
+        while assignments < len(solution.cities) * 2:
             # get best assignment (cheapest one)
             candidate_with_min_cost = solution.findBestFeasibleAssignment()
 
@@ -47,7 +48,11 @@ class Solver_Greedy(_Solver):
                 break
 
             # assign the current task to the CPU that resulted in a minimum highest load
-            solution.assign(candidate_with_min_cost.c_id, candidate.cpuId)
+
+            pc_or_sc = 'primary' if candidate_with_min_cost.is_primary is True else 'secondary'
+            solution.assign(candidate_with_min_cost.city, candidate_with_min_cost.location,
+                            candidate_with_min_cost.type, pc_or_sc)
+            assignments += 1
 
         return solution
 
