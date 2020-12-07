@@ -21,14 +21,13 @@ import random, time
 from Heuristics.solver import _Solver
 from Heuristics.solvers.localSearch import LocalSearch
 
-
 # Inherits from the parent abstract solver.
 class Solver_Greedy(_Solver):
 
     def _selectCandidate(self, candidateList):
         if self.config.solver == 'Greedy':
             # sort candidate assignments by highestLoad in ascending order
-            sortedCandidateList = sorted(candidateList, key=lambda x: x.highestLoad)
+            sortedCandidateList = sorted(candidateList, key=lambda x: x.center.getType().get_cost())
             # choose assignment with minimum highest load
             return sortedCandidateList[0]
         return random.choice(candidateList)
@@ -38,15 +37,13 @@ class Solver_Greedy(_Solver):
         solution = self.instance.createSolution()
 
         # get tasks and sort them by their total required resources in descending order
-        posibleLocations = self.instance.get_locations_at_min_distance()
-        sortedLocations = sorted(posibleLocations, key=lambda t: t.getTotalResources(), reverse=True)
+        cities = self.instance.getCities()
+        sortedCities = sorted(cities, key=lambda c: c.getPopulation(), reverse=True)
 
-
-        # for each task taken in sorted order
-        for location in sortedLocations:
+        for city in sortedCities:
 
             # compute feasible assignments
-            candidateList = solution.findFeasibleAssignments(location)
+            candidateList = solution.findFeasibleAssignments(city)
 
             # no candidate assignments => no feasible assignment found
             if not candidateList:
@@ -57,7 +54,8 @@ class Solver_Greedy(_Solver):
             candidate = self._selectCandidate(candidateList)
 
             # assign the current task to the CPU that resulted in a minimum highest load
-            solution.assign(taskId, candidate.cpuId)
+
+            solution.assign(candidate.center, city)
 
         return solution
 
