@@ -1,0 +1,13 @@
+nLocations = 5;
+nCities = 8;
+nTypes = 3;
+
+p = [9 9 4 10 4 9 2 8];
+posCities = [[6 6] [6 3] [4 4] [5 0] [5 4] [0 4] [0 1] [0 2]];
+posLocations = [[4 6] [5 3] [4 3] [3 0] [2 0]];
+
+d_city = [4 8 6];
+cap = [8 12 14];
+cost = [28 19 20];
+
+d_center = 0.5;

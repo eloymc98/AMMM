@@ -1,0 +1,18 @@
+# file name: ../AMMMLabHeuristics/data/instance_XX.dat
+instancesDirectory = output;
+fileNamePrefix = small;
+fileNameExtension = dat;
+numInstances = 10;
+
+nLocations = 5;
+nCities = 8;
+nTypes = 3;
+
+min_d_city = 1;
+max_d_city = 10;
+
+min_cap = 1;
+max_cap = 10;
+
+min_cost = 10;
+max_cost = 50;
