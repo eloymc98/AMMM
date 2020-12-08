@@ -226,7 +226,7 @@ class Solution(_Solution):
 
         return feasibleAssignments
 
-    def findBestFeasibleAssignments(self):
+    def findBestFeasibleAssignment(self):
         bestAssignment = Assignment(None, None, None, None)
         for c in self.cities:
             for l in self.locations:
