@@ -239,7 +239,8 @@ class Solution(_Solution):
                         if not feasible: continue
 
                         current_cost = self.cost
-                        if bestAssignment.cost > current_cost or (bestAssignment.cost == current_cost and random.random() > 0.5):
+                        if bestAssignment.cost > current_cost or (
+                                bestAssignment.cost == current_cost and random.random() > 0.5):
                             bestAssignment.location = l
                             bestAssignment.city = c
                             bestAssignment.type = t
@@ -251,29 +252,20 @@ class Solution(_Solution):
         return bestAssignment
 
     def __str__(self):
-        strSolution = 'z = %10.8f;\n' % self.fitness
-        if self.fitness == float('inf'): return strSolution
+        result_str = f'Solution found with cost {self.cost}\n'
+        for k in self.locations_used.keys():
+            result_str += f'Location {k} has a center of type {self.locations_used[k].get_id()}.'
+            result_str += f' It serves {round(self.usedPopulationPerCenter[k], 2)} inhabitants,'
+            result_str += f' max is {self.locations_used[k].get_capacity()}.\n'
+        for i in self.cities_centers.keys():
+            result_str += f'City {i} primary center is at location {self.cities_centers[i]["primary"]}'
+            result_str += f' (distance {self.cl_distances[i][self.cities_centers[i]["primary"]]},'
+            result_str += f' max is {self.locations_used[self.cities_centers[i]["primary"]].get_d_city()}).\n'
 
-        # Xtc: decision variable containing the assignment of tasks to CPUs
-        # pre-fill with no assignments (all-zeros)
-        xtc = []
-        for t in range(0, len(self.tasks)):  # t = 0..(nTasks-1)
-            xtcEntry = [0] * len(self.cpus)  # results in a vector of 0's with nCPUs elements
-            xtc.append(xtcEntry)
-
-        # iterate over hash table taskIdToCPUId and fill in xtc
-        for taskId, cpuId in self.taskIdToCPUId.items():
-            xtc[taskId][cpuId] = 1
-
-        strSolution += 'xtc = [\n'
-        for xtcEntry in xtc:
-            strSolution += '\t[ '
-            for xtcValue in xtcEntry:
-                strSolution += str(xtcValue) + ' '
-            strSolution += ']\n'
-        strSolution += '];\n'
-
-        return strSolution
+            result_str += f'City {i} secondary center is at location {self.cities_centers[i]["secondary"]}'
+            result_str += f' (distance {self.cl_distances[i][self.cities_centers[i]["secondary"]]},'
+            result_str += f' max is {3 * self.locations_used[self.cities_centers[i]["secondary"]].get_d_city()}).\n'
+        return result_str
 
     def saveToFile(self, filePath):
         f = open(filePath, 'w')
