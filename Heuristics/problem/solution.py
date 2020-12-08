@@ -210,9 +210,6 @@ class Solution(_Solution):
             for l in self.locations:
                 for t in self.types:
                     for pc_or_sc in ['primary', 'secondary']:
-                        if c.getId() in (4, 5, 6) and l.getId() == 0 and pc_or_sc == 'primary':
-                            pass
-
                         feasible = self.assign(c, l, t, pc_or_sc)
                         if not feasible: continue
                         feasibleAssignment.location = l
@@ -226,7 +223,7 @@ class Solution(_Solution):
 
         return feasibleAssignments
 
-    def findBestFeasibleAssignments(self):
+    def findBestFeasibleAssignment(self):
         bestAssignment = Assignment(None, None, None, None)
         for c in self.cities:
             for l in self.locations:
