@@ -2,22 +2,21 @@
 AMMM Lab Heuristics
 Representation of a solution instance
 Copyright 2020 Luis Velasco.
-
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
-
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 import copy
+import random
+
 from Heuristics.solution import _Solution
 
 
@@ -53,11 +52,21 @@ class Solution(_Solution):
         self.cities_centers = {}  # {c_id: {'primary': l1_id, 'secondary': l2_id}}
         self.usedPopulationPerCenter = {}
         self.cities_served_per_each_location = {}  # key: location_id, value: [(city,primary/secondary)]
+        self.complete = False
 
         super().__init__()
 
     def update_cost(self, assignment_cost):
         self.cost += assignment_cost
+
+    def is_complete(self):
+        if len(self.cities_centers.keys()) == len(self.cities):
+            complete_solution = True
+            for key in self.cities_centers.keys():
+                if self.cities_centers[key].get('primary') is None or self.cities_centers[key].get('secondary') is None:
+                    complete_solution = False
+            if complete_solution:
+                self.complete = True
 
     def isFeasibleToAssignCenterToCity(self, city, location, type, pc_or_sc):
 
@@ -85,22 +94,16 @@ class Solution(_Solution):
             return False
 
         # Check if location is compatible with locations already used
-        if len(self.locations_used) > 0:
-            flag = False
-            compatible_locations = []
+        if len(self.locations_used.keys()) > 0:
+            flag = True
             for k in self.locations_used.keys():
-                if location.getId() == k:
-                    flag = True
-                    break
-                if len(compatible_locations) == 0:
-                    compatible_locations = self.compatible_locations[k]
-                else:
-                    compatible_locations = list(set(compatible_locations) & set(self.compatible_locations[k]))
-
-            if location.getId() in compatible_locations:
+                if location.getId() not in self.compatible_locations[k]:
+                    flag = False
+            if location.getId() in self.locations_used.keys():
                 flag = True
             if not flag:
                 return False
+
         if self.usedPopulationPerCenter.get(location.getId()) is not None:
             if pc_or_sc == 'primary' and type.get_capacity() - self.usedPopulationPerCenter[
                 location.getId()] < city.getPopulation():
@@ -137,19 +140,22 @@ class Solution(_Solution):
         if taskId not in self.taskIdToCPUId: return None
         return self.taskIdToCPUId[taskId]
 
-    def assign(self, city, location, type, pc_or_sc):
+    def assign(self, city, location, type, pc_or_sc, check_completeness=False):
         if not self.isFeasibleToAssignCenterToCity(city, location, type, pc_or_sc): return False
 
         assignment_cost = 0
         if self.locations_used.get(location.getId()) is None:
             assignment_cost = type.get_cost()
-            self.cities_served_per_each_location[location.getId()] = [(city, pc_or_sc)]
         elif self.locations_used[location.getId()].get_id() != type.get_id():
             assignment_cost = type.get_cost() - self.locations_used[location.getId()].get_cost()
-            self.aux_locations_used[location.getId()] = self.locations_used[location.getId()]
-            self.cities_served_per_each_location[location.getId()].append((city, pc_or_sc))
+            if not check_completeness:
+                self.aux_locations_used[location.getId()] = self.locations_used[location.getId()]
 
         self.locations_used[location.getId()] = type
+        if self.cities_served_per_each_location.get(location.getId()) is None:
+            self.cities_served_per_each_location[location.getId()] = []
+        self.cities_served_per_each_location[location.getId()].append((city, pc_or_sc))
+
         if self.cities_centers.get(city.getId()) is not None:
             self.cities_centers[city.getId()][pc_or_sc] = location.getId()
         else:
@@ -163,6 +169,9 @@ class Solution(_Solution):
             self.usedPopulationPerCenter[location.getId()] += population
 
         self.cost += assignment_cost
+
+        if check_completeness:
+            self.is_complete()
         return True
 
     def unassign(self, city, location, type, pc_or_sc):
@@ -172,17 +181,14 @@ class Solution(_Solution):
         if self.aux_locations_used.get(location.getId()) is not None:
             assignment_cost = self.locations_used[location.getId()].get_cost() - self.aux_locations_used[
                 location.getId()].get_cost()
-            self.locations_used[location.getId()] = self.aux_locations_used[location.getId()]
+            self.locations_used[location.getId()] = copy.deepcopy(self.aux_locations_used[location.getId()])
             del self.aux_locations_used[location.getId()]
-        else:
+        elif len(self.cities_served_per_each_location[location.getId()]) == 1:
             assignment_cost = self.locations_used[location.getId()].get_cost()
             del self.locations_used[location.getId()]
 
         if len(self.cities_served_per_each_location[location.getId()]) > 1:
-            try:
-                self.cities_served_per_each_location[location.getId()].remove((city, pc_or_sc))
-            except ValueError:
-                print(':(')
+            self.cities_served_per_each_location[location.getId()].remove((city, pc_or_sc))
         else:
             del self.cities_served_per_each_location[location.getId()]
 
@@ -197,32 +203,20 @@ class Solution(_Solution):
         self.cost -= assignment_cost
         return True
 
-    # def findFeasibleAssignments(self):
-    #     feasibleAssignments = []
-    #     for c in self.cities:
-    #         c_id = c.getId()
-    #         for l in self.locations:
-    #             l_id = l.getId()
-    #             feasible = self.assign(c_id, cpuId)
-    #         if not feasible: continue
-    #         assignment = Assignment(taskId, cpuId, self.fitness)
-    #         feasibleAssignments.append(assignment)
-    #
-    #         self.unassign(taskId, cpuId)
-    #
-    #     return feasibleAssignments
-
     def findBestFeasibleAssignment(self):
         bestAssignment = Assignment(None, None, None, None)
         for c in self.cities:
             for l in self.locations:
                 for t in self.types:
                     for pc_or_sc in ['primary', 'secondary']:
+                        if c.getId() in (4, 5, 6) and l.getId() == 0 and pc_or_sc == 'primary':
+                            pass
+
                         feasible = self.assign(c, l, t, pc_or_sc)
                         if not feasible: continue
 
                         current_cost = self.cost
-                        if bestAssignment.cost > current_cost:
+                        if bestAssignment.cost > current_cost or (bestAssignment.cost == current_cost and random.random() > 0.5):
                             bestAssignment.location = l
                             bestAssignment.city = c
                             bestAssignment.type = t

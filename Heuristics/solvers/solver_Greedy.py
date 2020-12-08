@@ -36,14 +36,15 @@ class Solver_Greedy(_Solver):
     def construction(self):
         # get an empty solution for the problem
         solution = self.instance.createSolution()
+        assignment = 0
+        complete = False
+        while not complete:
 
-        assignments = 0
-        while assignments < len(solution.cities) * 2:
             # get best assignment (cheapest one)
             candidate_with_min_cost = solution.findBestFeasibleAssignment()
 
             # no candidate assignments => no feasible assignment found
-            if not candidate_with_min_cost:
+            if not candidate_with_min_cost or candidate_with_min_cost.city is None:
                 solution.makeInfeasible()
                 break
 
@@ -51,8 +52,11 @@ class Solver_Greedy(_Solver):
 
             pc_or_sc = 'primary' if candidate_with_min_cost.is_primary is True else 'secondary'
             solution.assign(candidate_with_min_cost.city, candidate_with_min_cost.location,
-                            candidate_with_min_cost.type, pc_or_sc)
-            assignments += 1
+                            candidate_with_min_cost.type, pc_or_sc, check_completeness=True)
+            print(
+                f'City {candidate_with_min_cost.city.getId()}, Location {candidate_with_min_cost.location.getId()}, Type {candidate_with_min_cost.type.get_id()}, Cost {solution.cost}, {pc_or_sc}')
+            complete = solution.complete
+            assignment += 1
 
         return solution
 
@@ -71,7 +75,7 @@ class Solver_Greedy(_Solver):
 
         solution = self.construction()
         self.elapsedEvalTime = time.time() - self.startTime
-        self.writeLogLine(solution.getFitness(), 1)
+        self.writeLogLine(solution.cost, 1)
         self.numSolutionsConstructed = 1
         if self.config.localSearch:
             localSearch = LocalSearch(self.config, None)
