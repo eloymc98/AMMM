@@ -203,6 +203,29 @@ class Solution(_Solution):
         self.cost -= assignment_cost
         return True
 
+    def findFeasibleAssignments(self):
+        feasibleAssignments = []
+        feasibleAssignment = Assignment(None, None, None, None)
+        for c in self.cities:
+            for l in self.locations:
+                for t in self.types:
+                    for pc_or_sc in ['primary', 'secondary']:
+                        if c.getId() in (4, 5, 6) and l.getId() == 0 and pc_or_sc == 'primary':
+                            pass
+
+                        feasible = self.assign(c, l, t, pc_or_sc)
+                        if not feasible: continue
+                        feasibleAssignment.location = l
+                        feasibleAssignment.city = c
+                        feasibleAssignment.type = t
+                        feasibleAssignment.is_primary = True if pc_or_sc == 'primary' else False
+                        feasibleAssignment.cost = self.cost
+                        feasibleAssignments.append(feasibleAssignment)
+
+                        self.unassign(c, l, t, pc_or_sc)
+
+        return feasibleAssignments
+
     def findBestFeasibleAssignment(self):
         bestAssignment = Assignment(None, None, None, None)
         for c in self.cities:
