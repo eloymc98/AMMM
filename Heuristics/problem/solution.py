@@ -197,20 +197,28 @@ class Solution(_Solution):
         self.cost -= assignment_cost
         return True
 
-    # def findFeasibleAssignments(self):
-    #     feasibleAssignments = []
-    #     for c in self.cities:
-    #         c_id = c.getId()
-    #         for l in self.locations:
-    #             l_id = l.getId()
-    #             feasible = self.assign(c_id, cpuId)
-    #         if not feasible: continue
-    #         assignment = Assignment(taskId, cpuId, self.fitness)
-    #         feasibleAssignments.append(assignment)
-    #
-    #         self.unassign(taskId, cpuId)
-    #
-    #     return feasibleAssignments
+    def findFeasibleAssignments(self):
+        feasibleAssignments = []
+        assigment = Assignment(None, None, None, None)
+        for c in self.cities:
+            for l in self.locations:
+                for t in self.types:
+                    for pc_or_sc in ['primary', 'secondary']:
+                        feasible = self.assign(c, l, t, pc_or_sc)
+                        if not feasible: continue
+
+                        current_cost = self.cost
+                        if assigment.cost > current_cost:
+                            assigment.location = l
+                            assigment.city = c
+                            assigment.type = t
+                            assigment.is_primary = True if pc_or_sc == 'primary' else False
+                            assigment.cost = self.cost
+                            feasibleAssignments.append(assigment)
+
+                        self.unassign(c, l, t, pc_or_sc)
+
+        return feasibleAssignments
 
     def findBestFeasibleAssignment(self):
         bestAssignment = Assignment(None, None, None, None)
