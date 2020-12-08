@@ -53,8 +53,8 @@ class Solver_Greedy(_Solver):
             pc_or_sc = 'primary' if candidate_with_min_cost.is_primary is True else 'secondary'
             solution.assign(candidate_with_min_cost.city, candidate_with_min_cost.location,
                             candidate_with_min_cost.type, pc_or_sc, check_completeness=True)
-            print(
-                f'City {candidate_with_min_cost.city.getId()}, Location {candidate_with_min_cost.location.getId()}, Type {candidate_with_min_cost.type.get_id()}, Cost {solution.cost}, {pc_or_sc}')
+            # print(
+            #     f'City {candidate_with_min_cost.city.getId()}, Location {candidate_with_min_cost.location.getId()}, Type {candidate_with_min_cost.type.get_id()}, Cost {solution.cost}, {pc_or_sc}')
             complete = solution.complete
             assignment += 1
 
