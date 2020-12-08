@@ -1,1 +1,1 @@
-z = 60.00000000;
+Solution found with cost 0.0

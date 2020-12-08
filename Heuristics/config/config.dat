@@ -2,7 +2,7 @@
 inputDataFile        = data/project.1.dat;        # Input DAT file
 solutionFile         = solutions/project_1.sol;   # Output DAT file (solution)
 solver               = GRASP;                  # Supported solvers: Greedy / GRASP
-maxExecTime          = 300;                      # Maximum execution time in seconds
+maxExecTime          = 100;                      # Maximum execution time in seconds
 verbose              = True;                    # Verbose mode?
 
 # --- Greedy / Random specific parameters ---------------------------------------------------------------------
@@ -10,7 +10,7 @@ verbose              = True;                    # Verbose mode?
 
 # --- GRASP constructive specific parameters ------------------------------------------------------------------
 # Ignored if solver is not GRASP.
-alpha                = 1;                 # Alpha parameter for the GRASP solver.
+alpha                = 0.5;                 # Alpha parameter for the GRASP solver.
 
 # --- Local Search specific parameters ------------------------------------------------------------------------
 localSearch          = False;                # Enable local search?
