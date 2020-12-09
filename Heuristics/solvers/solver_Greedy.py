@@ -27,10 +27,18 @@ class Solver_Greedy(_Solver):
 
     def _selectCandidate(self, candidateList):
         if self.config.solver == 'Greedy':
-            # sort candidate assignments by highestLoad in ascending order
-            sortedCandidateList = sorted(candidateList, key=lambda x: x.highestLoad)
-            # choose assignment with minimum highest load
-            return sortedCandidateList[0]
+            # sort candidate assignments by cost in ascending order
+            sortedCandidateList = sorted(candidateList, key=lambda x: x.cost)
+            # choose assignment with minimum cost
+            best_candidates = []
+            min_value = sortedCandidateList[0].cost
+            for c in sortedCandidateList:
+                if c.cost == min_value:
+                    best_candidates.append(c)
+                else:
+                    break
+            # if there are multiple assignments with min cost, select one randomly
+            return random.choice(best_candidates)
         return random.choice(candidateList)
 
     def construction(self):
@@ -41,14 +49,16 @@ class Solver_Greedy(_Solver):
         while not complete:
 
             # get best assignment (cheapest one)
-            candidate_with_min_cost = solution.findBestFeasibleAssignment()
+            candidates = solution.findFeasibleAssignments()
 
             # no candidate assignments => no feasible assignment found
-            if not candidate_with_min_cost or candidate_with_min_cost.city is None:
+            if not candidates:
+                print('Greedy construction is infeasible. Please try again!')
                 solution.makeInfeasible()
                 break
 
-            # assign the current task to the CPU that resulted in a minimum highest load
+            # assign the assignment with min cost
+            candidate_with_min_cost = self._selectCandidate(candidates)
 
             pc_or_sc = 'primary' if candidate_with_min_cost.is_primary is True else 'secondary'
             solution.assign(candidate_with_min_cost.city, candidate_with_min_cost.location,

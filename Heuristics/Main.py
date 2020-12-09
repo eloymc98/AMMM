@@ -49,8 +49,9 @@ class Main:
                 else:
                     raise AMMMException('Solver %s not supported.' % str(self.config.solver))
                 solution = solver.solve(solution=initialSolution)
-                print(str(solution))
-                solution.saveToFile(self.config.solutionFile)
+                if solution.feasible:
+                    print(str(solution))
+                    solution.saveToFile(self.config.solutionFile)
             else:
                 print('Instance is infeasible.')
                 solution = instance.createSolution()
