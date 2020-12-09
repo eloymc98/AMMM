@@ -48,7 +48,7 @@ class Solver_Greedy(_Solver):
         complete = False
         while not complete:
 
-            # get best assignment (cheapest one)
+            # get feasible assignments
             candidates = solution.findFeasibleAssignments()
 
             # no candidate assignments => no feasible assignment found
