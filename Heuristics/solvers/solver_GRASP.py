@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 import random
+import copy
 import time
 from Heuristics.solver import _Solver
 from Heuristics.solvers.localSearch import LocalSearch
@@ -29,7 +30,7 @@ class Solver_GRASP(_Solver):
     def _selectCandidate(self, candidateList, alpha):
 
         # sort candidate assignments by highestLoad in ascending order
-        sortedCandidateList = sorted(candidateList, key=lambda x: x.cost, reverse=True)
+        sortedCandidateList = sorted(candidateList, key=lambda x: x.cost, reverse=False)
         
         # compute boundary highest load as a function of the minimum and maximum highest loads and the alpha parameter
         minHLoad = sortedCandidateList[0].cost
@@ -49,10 +50,10 @@ class Solver_GRASP(_Solver):
     
     def _greedyRandomizedConstruction(self, alpha):
         solution = self.instance.createSolution()
+        assignment = 0
+        complete = False
+        while not complete:
 
-        assignments = 0
-        while assignments < len(solution.cities) * 2:
-            # get best assignment (cheapest one)
             candidateList = solution.findFeasibleAssignments()
 
             # no candidate assignments => no feasible assignment found
@@ -60,13 +61,13 @@ class Solver_GRASP(_Solver):
                 solution.makeInfeasible()
                 break
 
-            # assign the current task to the CPU that resulted in a minimum highest load
             candidate = self._selectCandidate(candidateList, alpha)
 
             pc_or_sc = 'primary' if candidate.is_primary is True else 'secondary'
             solution.assign(candidate.city, candidate.location,
-                            candidate.type, pc_or_sc)
-            assignments += 1
+                            candidate.type, pc_or_sc, check_completeness=True)
+            complete = solution.complete
+            assignment += 1
 
         return solution
     
@@ -78,6 +79,7 @@ class Solver_GRASP(_Solver):
         self.startTimeMeasure()
         incumbent = self.instance.createSolution()
         incumbent.makeInfeasible()
+        incumbent.cost = float('infinity')
         cost = incumbent.cost
         self.writeLogLine(cost, 0)
 
@@ -92,7 +94,7 @@ class Solver_GRASP(_Solver):
             if solution.isFeasible():
                 solutionLowestCost = solution.cost
                 if solutionLowestCost < cost:
-                    incumbent = solution
+                    incumbent = copy.deepcopy(solution)
                     cost = solutionLowestCost
                     self.writeLogLine(cost, iteration)
 
