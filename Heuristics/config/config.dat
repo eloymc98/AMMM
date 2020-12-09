@@ -2,7 +2,7 @@
 inputDataFile        = data/project.1.dat;        # Input DAT file
 solutionFile         = solutions/project_1.sol;   # Output DAT file (solution)
 solver               = Greedy;                  # Supported solvers: Greedy / GRASP
-maxExecTime          = 180;                      # Maximum execution time in seconds
+maxExecTime          = 300;                      # Maximum execution time in seconds
 verbose              = True;                    # Verbose mode?
 
 # --- Greedy / Random specific parameters ---------------------------------------------------------------------
@@ -13,6 +13,6 @@ verbose              = True;                    # Verbose mode?
 alpha                = 0.5;                 # Alpha parameter for the GRASP solver.
 
 # --- Local Search specific parameters ------------------------------------------------------------------------
-localSearch          = False;                # Enable local search?
-neighborhoodStrategy = TaskExchange;        # Supported Neighborhoods: TaskExchange
+localSearch          = True;                # Enable local search?
+neighborhoodStrategy = Reassignment;        # Supported Neighborhoods: Reassignment
 policy               = BestImprovement;    # Supported Policies: FirstImprovement / BestImprovement

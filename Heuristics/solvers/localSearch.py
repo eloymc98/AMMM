@@ -28,7 +28,7 @@ from AMMMGlobals import AMMMException
 # A new solution can be created based on an existing solution and a list of
 # changes using the createNeighborSolution(solution, moves) function.
 class Move(object):
-    def __init__(self, taskId, curCPUId, newCPUId): #TODO: Change parameters function
+    def __init__(self, taskId, curCPUId, newCPUId):  # TODO: Change parameters function
         self.taskId = taskId
         self.curCPUId = curCPUId
         self.newCPUId = newCPUId
@@ -107,18 +107,20 @@ class LocalSearch(_Solver):
         cpusWithAssignments.sort(key=lambda cpuWithAssignment: cpuWithAssignment[1], reverse=True)
         return cpusWithAssignments
 
-    def getAssignmentsSortedByCPULoad(self, solution):
-        tasks = solution.tasks
-        cpus = solution.cpus
+    def getAssignmentsSortedByCost(self, solution):
+        cities_centers = solution.cities_centers
+        locations_used = solution.locations_used
 
-        # create vector of assignments <task, cpu>
+        # create vector of assignments <location, type>
         assignments = []
-        for task in tasks:
-            taskId = task.getId()
-            cpuId = solution.getCPUIdAssignedToTaskId(taskId)
-            cpu = cpus[cpuId]
-            highestLoad = solution.loadPerCPUId[cpuId]
-            assignment = (task, cpu, highestLoad)
+        for c_id in cities_centers.keys():
+            primary_l1_id = cities_centers[c_id]['primary'].getId()
+            secondary_l2_id = cities_centers[c_id]['secondary'].getId()
+
+            l1_type_id = locations_used[primary_l1_id].get_id()
+            l2_type_id = locations_used[secondary_l2_id].get_id()
+
+            assignment1 = (task, cpu, highestLoad)
             assignments.append(assignment)
 
         # For best improvement policy it does not make sense to sort the tasks since all of them must be explored.
@@ -130,11 +132,14 @@ class LocalSearch(_Solver):
         return sorted_assignments
 
     def exploreReassignment(self, solution):
-        cpus = solution.cpus
-        curHighestLoad = solution.getFitness()
+        cities = solution.cities
+        locations = solution.locations
+        types = solution.types
+
+        current_cost = solution.get_cost()
         bestNeighbor = solution
 
-        sortedAssignments = self.getAssignmentsSortedByCPULoad(solution)
+        sortedAssignments = self.getAssignmentsSortedByCost(solution)
 
         for assignment in sortedAssignments:
             task = assignment[0]
@@ -171,7 +176,7 @@ class LocalSearch(_Solver):
         cpusWithAssignments = self.getCPUswithAssignemnts(solution)
         nCPUs = len(cpusWithAssignments)
 
-        for h in range(0, nCPUs-1):  # i = 0..(nCPUs-2)
+        for h in range(0, nCPUs - 1):  # i = 0..(nCPUs-2)
             CPUPair_h = cpusWithAssignments[h]
             availCapacityCPU_h = CPUPair_h[2]
             for th in range(0, len(CPUPair_h[3])):
@@ -181,26 +186,31 @@ class LocalSearch(_Solver):
                     availCapacityCPU_l = CPUPair_l[2]
                     for tl in range(0, len(CPUPair_l[3])):
                         taskPair_l = CPUPair_l[3][tl]
-                        if (taskPair_l[1] - taskPair_h[1]) <= availCapacityCPU_h and\
+                        if (taskPair_l[1] - taskPair_h[1]) <= availCapacityCPU_h and \
                                 (taskPair_h[1] - taskPair_l[1]) <= availCapacityCPU_l and \
                                 (taskPair_l[1] != taskPair_h[1]) and \
-                                (availCapacityCPU_l + taskPair_l[1] - taskPair_h[1]) != availCapacityCPU_h :
-                            moves = [Move(taskPair_h[0], CPUPair_h[0], CPUPair_l[0]), Move(taskPair_l[0], CPUPair_l[0], CPUPair_h[0])]
+                                (availCapacityCPU_l + taskPair_l[1] - taskPair_h[1]) != availCapacityCPU_h:
+                            moves = [Move(taskPair_h[0], CPUPair_h[0], CPUPair_l[0]),
+                                     Move(taskPair_l[0], CPUPair_l[0], CPUPair_h[0])]
                             neighborHighestLoad = self.evaluateNeighbor(solution, moves)
                             if neighborHighestLoad <= curHighestLoad:
                                 neighbor = self.createNeighborSolution(solution, moves)
                                 if neighbor is None:
                                     raise AMMMException('[exploreExchange] No neighbouring solution could be created')
-                                if self.policy == 'FirstImprovement': return neighbor
+                                if self.policy == 'FirstImprovement':
+                                    return neighbor
                                 else:
                                     bestNeighbor = neighbor
                                     curHighestLoad = neighborHighestLoad
         return bestNeighbor
 
     def exploreNeighborhood(self, solution):
-        if self.nhStrategy == 'TaskExchange': return self.exploreExchange(solution)
-        elif self.nhStrategy == 'Reassignment': return self.exploreReassignment(solution)
-        else: raise AMMMException('Unsupported NeighborhoodStrategy(%s)' % self.nhStrategy)
+        if self.nhStrategy == 'TaskExchange':
+            return self.exploreExchange(solution)
+        elif self.nhStrategy == 'Reassignment':
+            return self.exploreReassignment(solution)
+        else:
+            raise AMMMException('Unsupported NeighborhoodStrategy(%s)' % self.nhStrategy)
 
     def solve(self, **kwargs):
         initialSolution = kwargs.get('solution', None)

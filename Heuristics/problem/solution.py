@@ -22,12 +22,15 @@ from Heuristics.solution import _Solution
 
 # This class stores the location and center type that serves as primary/secondary center a given city.
 class Assignment(object):
-    def __init__(self, location, type, city, is_primary):
+    def __init__(self, location, type, city, is_primary, cost=None):
         self.location = location
         self.type = type
         self.city = city
         self.is_primary = is_primary
-        self.cost = float('infinity')
+        if cost is None:
+            self.cost = float('infinity')
+        else:
+            self.cost = cost
 
     def __str__(self):
         return "<c_%d, l_%d, t_%d>: %s center" % (
@@ -58,6 +61,9 @@ class Solution(_Solution):
 
     def update_cost(self, assignment_cost):
         self.cost += assignment_cost
+
+    def get_cost(self):
+        return self.cost
 
     def is_complete(self):
         if len(self.cities_centers.keys()) == len(self.cities):
@@ -139,6 +145,9 @@ class Solution(_Solution):
     def getCPUIdAssignedToTaskId(self, taskId):
         if taskId not in self.taskIdToCPUId: return None
         return self.taskIdToCPUId[taskId]
+
+    def get_type_assigned_to_locationId(self, locationId):
+        return self.locations_used[locationId]
 
     def assign(self, city, location, type, pc_or_sc, check_completeness=False):
         if not self.isFeasibleToAssignCenterToCity(city, location, type, pc_or_sc): return False
