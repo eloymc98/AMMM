@@ -259,6 +259,7 @@ class Solution(_Solution):
             result_str += f'City {i} secondary center is at location {self.cities_centers[i]["secondary"]}'
             result_str += f' (distance {self.cl_distances[i][self.cities_centers[i]["secondary"]]},'
             result_str += f' max is {3 * self.locations_used[self.cities_centers[i]["secondary"]].get_d_city()}).\n'
+
         return result_str
 
     def saveToFile(self, filePath):
