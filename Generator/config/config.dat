@@ -2,17 +2,17 @@
 instancesDirectory = output;
 fileNamePrefix = small;
 fileNameExtension = dat;
-numInstances = 10;
+numInstances = 1;
 
-nLocations = 5;
-nCities = 8;
+nLocations = 20;
+nCities = 32;
 nTypes = 3;
 
 min_d_city = 1;
-max_d_city = 10;
+max_d_city = 20;
 
 min_cap = 1;
-max_cap = 10;
+max_cap = 40;
 
 min_cost = 10;
 max_cost = 50;

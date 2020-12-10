@@ -1,4 +1,4 @@
-'''
+"""
 AMMM P2 Instance Generator v2.0
 Instance Generator class.
 Copyright 2020 Luis Velasco.
@@ -15,7 +15,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-'''
+"""
 
 import os, random
 from AMMMGlobals import AMMMException
@@ -59,9 +59,9 @@ class InstanceGenerator(object):
                 p[c] = random.randint(min_cap, max_cap)
 
             posCities = [''] * nCities
-            for id, x in enumerate(posCities):
+            for idy, x in enumerate(posCities):
                 newValue = self.create_locations(min_pos, max_pos, posCities)
-                posCities[id] = newValue
+                posCities[idy] = newValue
 
             posLocations = [''] * nLocations
             for idx, x in enumerate(posLocations):
@@ -83,7 +83,9 @@ class InstanceGenerator(object):
             fInstance.write('nTypes = %d;\n' % nTypes)
             fInstance.write('\n')
 
-            # translate vector of floats into vector of strings and concatenate that strings separating them by a single space character
+            # translate vector of floats into vector of strings and
+            # concatenate that strings separating them by a single space character
+
             fInstance.write('p = [%s];\n' % (' '.join(map(str, p))))
             fInstance.write('posCities = [%s];\n' % (' '.join(map(str, posCities))))
             fInstance.write('posLocations = [%s];\n' % (' '.join(map(str, posLocations))))

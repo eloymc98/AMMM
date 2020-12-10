@@ -103,7 +103,11 @@ class Solver_GRASP(_Solver):
                     cost = solutionLowestCost
                     self.writeLogLine(cost, iteration)
 
-        self.writeLogLine(cost, iteration)
-        self.numSolutionsConstructed = iteration
-        self.printPerformance()
+        if incumbent.cost == float('infinity'):
+            print('Problem is infeasible. Please try again!')
+            incumbent.makeInfeasible()
+        else:
+            self.writeLogLine(cost, iteration)
+            self.numSolutionsConstructed = iteration
+            self.printPerformance()
         return incumbent
