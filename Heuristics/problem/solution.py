@@ -123,6 +123,7 @@ class Solution(_Solution):
 
         return True
 
+    # Check if feasible to unassing center from city
     def isFeasibleToUnassignCenterFromCity(self, city, location, type, pc_or_sc):
         if self.locations_used.get(location.getId()) is None:
             return False
@@ -132,13 +133,7 @@ class Solution(_Solution):
             return False
         return True
 
-    def getCPUIdAssignedToTaskId(self, taskId):
-        if taskId not in self.taskIdToCPUId: return None
-        return self.taskIdToCPUId[taskId]
-
-    def get_type_assigned_to_locationId(self, locationId):
-        return self.locations_used[locationId]
-
+    # assign one center to a city
     def assign(self, city, location, type, pc_or_sc, check_completeness=False):
         if not self.isFeasibleToAssignCenterToCity(city, location, type, pc_or_sc): return False
 
@@ -173,6 +168,7 @@ class Solution(_Solution):
             self.is_complete()
         return True
 
+    # unassign one center to a city
     def unassign(self, city, location, type, pc_or_sc):
         if not self.isFeasibleToUnassignCenterFromCity(city, location, type, pc_or_sc): return False
 
@@ -211,6 +207,7 @@ class Solution(_Solution):
         self.cost -= assignment_cost
         return True
 
+    # change center type of a location
     def change_location_type(self, location, t):
         population = self.usedPopulationPerCenter[location.getId()]
         infeasible = False
@@ -238,6 +235,7 @@ class Solution(_Solution):
 
         return True
 
+    # find all feasible assigment and return a list
     def findFeasibleAssignments(self):
         feasibleAssignments = []
         for c in self.cities:
@@ -254,31 +252,6 @@ class Solution(_Solution):
                         self.unassign(c, l, t, pc_or_sc)
 
         return feasibleAssignments
-
-    def findBestFeasibleAssignment(self):
-        bestAssignment = Assignment(None, None, None, None)
-        for c in self.cities:
-            for l in self.locations:
-                for t in self.types:
-                    for pc_or_sc in ['primary', 'secondary']:
-                        if c.getId() in (4, 5, 6) and l.getId() == 0 and pc_or_sc == 'primary':
-                            pass
-
-                        feasible = self.assign(c, l, t, pc_or_sc)
-                        if not feasible: continue
-
-                        current_cost = self.cost
-                        if bestAssignment.cost > current_cost or (
-                                bestAssignment.cost == current_cost and random.random() > 0.5):
-                            bestAssignment.location = l
-                            bestAssignment.city = c
-                            bestAssignment.type = t
-                            bestAssignment.is_primary = True if pc_or_sc == 'primary' else False
-                            bestAssignment.cost = self.cost
-
-                        self.unassign(c, l, t, pc_or_sc)
-
-        return bestAssignment
 
     def __str__(self):
         result_str = f'Solution found with cost {self.cost}\n'

@@ -1,21 +1,10 @@
-'''
-AMMM Lab Heuristics
+"""
+AMMM Project
 Greedy solver
-Copyright 2020 Luis Velasco.
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-'''
+Eloy Marín, Pablo Pazos
+File given Luis Velasco and under its copyright policy
+Modified for project purposes
+"""
 
 import random, time
 from Heuristics.solver import _Solver
@@ -63,8 +52,8 @@ class Solver_Greedy(_Solver):
             pc_or_sc = 'primary' if candidate_with_min_cost.is_primary is True else 'secondary'
             solution.assign(candidate_with_min_cost.city, candidate_with_min_cost.location,
                             candidate_with_min_cost.type, pc_or_sc, check_completeness=True)
-            # print(
-            #     f'City {candidate_with_min_cost.city.getId()}, Location {candidate_with_min_cost.location.getId()}, Type {candidate_with_min_cost.type.get_id()}, Cost {solution.cost}, {pc_or_sc}')
+            # print(f'City {candidate_with_min_cost.city.getId()}, Location {candidate_with_min_cost.location.getId()},
+            # Type {candidate_with_min_cost.type.get_id()}, Cost {solution.cost}, {pc_or_sc}')
             complete = solution.complete
             assignment += 1
 

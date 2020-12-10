@@ -1,21 +1,10 @@
-'''
-AMMM Lab Heuristics
+"""
+AMMM Project
 GRASP solver
-Copyright 2018 Luis Velasco.
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-'''
+Eloy Marín, Pablo Pazos
+File given Luis Velasco and under its copyright policy
+Modified for project purposes
+"""
 
 import random
 import copy
@@ -29,10 +18,10 @@ class Solver_GRASP(_Solver):
 
     def _selectCandidate(self, candidateList, alpha):
 
-        # sort candidate assignments by highestLoad in ascending order
+        # sort candidate assignments by cost in descending order
         sortedCandidateList = sorted(candidateList, key=lambda x: x.cost, reverse=False)
 
-        # compute boundary highest load as a function of the minimum and maximum highest loads and the alpha parameter
+        # compute boundary cost as a function of the minimum and maximum cost and the alpha parameter
         minHLoad = sortedCandidateList[0].cost
         maxHLoad = sortedCandidateList[-1].cost
         boundaryHLoad = minHLoad + (maxHLoad - minHLoad) * alpha
@@ -45,7 +34,8 @@ class Solver_GRASP(_Solver):
 
         # create RCL and pick an element randomly
         rcl = sortedCandidateList[0:maxIndex]  # pick first maxIndex elements starting from element 0
-        if not rcl: return None
+        if not rcl:
+            return None
         return random.choice(rcl)  # pick a candidate from rcl at random
 
     def _greedyRandomizedConstruction(self, alpha):
@@ -86,9 +76,6 @@ class Solver_GRASP(_Solver):
         iteration = 0
         while not self.stopCriteria():
             iteration += 1
-
-            # force first iteration as a Greedy execution (alpha == 0)
-            # alpha = 0 if iteration == 1 else self.config.alpha
             alpha = self.config.alpha
             solution = self._greedyRandomizedConstruction(alpha)
             if self.config.localSearch:

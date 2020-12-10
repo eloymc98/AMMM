@@ -33,9 +33,6 @@ class _Solution(object):
             raise AMMMException('verbose(%s) has to be a boolean value.' % str(verbose))
         self.verbose = verbose
 
-    def getFitness(self):
-        return self.fitness
-
     def makeInfeasible(self):
         self.feasible = False
         self.fitness = float('inf')
