@@ -2,6 +2,8 @@
 AMMM Project Instance Generator
 Instance Generator class.
 Eloy Marín, Pablo Pazos
+File given Luis Velasco and under its copyright policy
+Modified for project purposes
 """
 
 import os, random
