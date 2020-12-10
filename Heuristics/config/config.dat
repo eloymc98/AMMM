@@ -2,7 +2,7 @@
 # --- Common specific parameters ------------------------------------------------------------------------------
 inputDataFile        = data/big_test.dat;        # Input DAT file
 solutionFile         = solutions/big_test.sol;   # Output DAT file (solution)
-solver               = Greedy;                  # Supported solvers: Greedy / GRASP
+solver               = GRASP;                  # Supported solvers: Greedy / GRASP
 maxExecTime          = 300;                      # Maximum execution time in seconds
 verbose              = True;                    # Verbose mode?
 
