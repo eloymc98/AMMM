@@ -1,5 +1,5 @@
 """
-AMMM Project Instance Generator
+AMMM Project
 Config attributes validator.
 Eloy Marín, Pablo Pazos
 File given Luis Velasco and under its copyright policy

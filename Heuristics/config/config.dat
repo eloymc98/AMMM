@@ -1,3 +1,4 @@
+# file in which the parameters of the Solver must be specified
 # --- Common specific parameters ------------------------------------------------------------------------------
 inputDataFile        = data/big_test.dat;        # Input DAT file
 solutionFile         = solutions/big_test.sol;   # Output DAT file (solution)
