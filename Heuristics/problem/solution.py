@@ -1,17 +1,9 @@
 """
-AMMM Lab Heuristics
-Representation of a solution instance
-Copyright 2020 Luis Velasco.
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
+AMMM Project
+Representation of a solution
+Eloy Marín, Pablo Pazos
+File given Luis Velasco and under its copyright policy
+Modified for project purposes
 """
 
 import copy
@@ -47,24 +39,27 @@ class Solution(_Solution):
         self.types = types
         self.compatible_locations = compatible_locations
         self.cl_distances = cl_distances
-
-        self.locations_used = {}  # add to this dict locations that are used. key: l_id , value: type class
-
+        # add to this dict locations that are used. key: l_id , value: type class
+        self.locations_used = {}
         self.aux_locations_used = {}
         # for each city define its primary and secondary centers
-        self.cities_centers = {}  # {c_id: {'primary': l1_id, 'secondary': l2_id}}
+        # {c_id: {'primary': l1_id, 'secondary': l2_id}}
+        self.cities_centers = {}
         self.usedPopulationPerCenter = {}
-        self.cities_served_per_each_location = {}  # key: location_id, value: [(city,primary/secondary)]
+        # key: location_id, value: [(city,primary/secondary)]
+        self.cities_served_per_each_location = {}
         self.complete = False
 
         super().__init__()
 
+    # Update the total cost of the solution
     def update_cost(self, assignment_cost):
         self.cost += assignment_cost
 
     def get_cost(self):
         return self.cost
 
+    # Check if the solution is completed
     def is_complete(self):
         if len(self.cities_centers.keys()) == len(self.cities):
             complete_solution = True
@@ -75,7 +70,6 @@ class Solution(_Solution):
                 self.complete = True
 
     def isFeasibleToAssignCenterToCity(self, city, location, type, pc_or_sc):
-
         # Check if location is already used with another type
         # if len(self.locations_used) > 0:
         #     for l in self.locations_used:
@@ -92,11 +86,11 @@ class Solution(_Solution):
                     self.cities_centers[city.getId()].get('primary') == location.getId():
                 return False
 
+        # Check if we want to make this location-type primary but distance constraint is not fulfilled
         if pc_or_sc == 'primary' and self.cl_distances[city.getId()][location.getId()] > type.get_d_city():
-            # Check if we want to make this location-type primary but distance constraint is not fulfilled
             return False
+        # Check if we want to make this location-type secondary but distance constraint is not fulfilled
         elif pc_or_sc == 'secondary' and self.cl_distances[city.getId()][location.getId()] > 3 * type.get_d_city():
-            # Check if we want to make this location-type secondary but distance constraint is not fulfilled
             return False
 
         # Check if location is compatible with locations already used
@@ -111,11 +105,9 @@ class Solution(_Solution):
                 return False
 
         if self.usedPopulationPerCenter.get(location.getId()) is not None:
-            if pc_or_sc == 'primary' and type.get_capacity() - self.usedPopulationPerCenter[
-                location.getId()] < city.getPopulation():
+            if pc_or_sc == 'primary' and type.get_capacity() - self.usedPopulationPerCenter[location.getId()] < city.getPopulation():
                 return False
-            elif pc_or_sc == 'secondary' and type.get_capacity() - self.usedPopulationPerCenter[
-                location.getId()] < 0.1 * city.getPopulation():
+            elif pc_or_sc == 'secondary' and type.get_capacity() - self.usedPopulationPerCenter[location.getId()] < 0.1 * city.getPopulation():
                 return False
 
         # If we change center type, we have to respect the distances of the cities that it serves as primary/secondary
@@ -124,15 +116,14 @@ class Solution(_Solution):
             old_type = self.locations_used[location.getId()]
             if old_type.get_id() != type.get_id():
                 for value in self.cities_served_per_each_location[location.getId()]:
-                    if value[1] == 'primary' and self.cl_distances[value[0].getId()][
-                        location.getId()] > type.get_d_city():
+                    if value[1] == 'primary' and self.cl_distances[value[0].getId()][location.getId()] > type.get_d_city():
                         return False
-                    elif value[1] == 'secondary' and self.cl_distances[value[0].getId()][
-                        location.getId()] > 3 * type.get_d_city():
+                    elif value[1] == 'secondary' and self.cl_distances[value[0].getId()][location.getId()] > 3 * type.get_d_city():
                         return False
 
         return True
 
+    # Check if feasible to unassing center from city
     def isFeasibleToUnassignCenterFromCity(self, city, location, type, pc_or_sc):
         if self.locations_used.get(location.getId()) is None:
             return False
@@ -142,13 +133,7 @@ class Solution(_Solution):
             return False
         return True
 
-    def getCPUIdAssignedToTaskId(self, taskId):
-        if taskId not in self.taskIdToCPUId: return None
-        return self.taskIdToCPUId[taskId]
-
-    def get_type_assigned_to_locationId(self, locationId):
-        return self.locations_used[locationId]
-
+    # assign one center to a city
     def assign(self, city, location, type, pc_or_sc, check_completeness=False):
         if not self.isFeasibleToAssignCenterToCity(city, location, type, pc_or_sc): return False
 
@@ -183,6 +168,7 @@ class Solution(_Solution):
             self.is_complete()
         return True
 
+    # unassign one center to a city
     def unassign(self, city, location, type, pc_or_sc):
         if not self.isFeasibleToUnassignCenterFromCity(city, location, type, pc_or_sc): return False
 
@@ -221,6 +207,7 @@ class Solution(_Solution):
         self.cost -= assignment_cost
         return True
 
+    # change center type of a location
     def change_location_type(self, location, t):
         population = self.usedPopulationPerCenter[location.getId()]
         infeasible = False
@@ -248,6 +235,7 @@ class Solution(_Solution):
 
         return True
 
+    # find all feasible assigment and return a list
     def findFeasibleAssignments(self):
         feasibleAssignments = []
         for c in self.cities:
@@ -264,31 +252,6 @@ class Solution(_Solution):
                         self.unassign(c, l, t, pc_or_sc)
 
         return feasibleAssignments
-
-    def findBestFeasibleAssignment(self):
-        bestAssignment = Assignment(None, None, None, None)
-        for c in self.cities:
-            for l in self.locations:
-                for t in self.types:
-                    for pc_or_sc in ['primary', 'secondary']:
-                        if c.getId() in (4, 5, 6) and l.getId() == 0 and pc_or_sc == 'primary':
-                            pass
-
-                        feasible = self.assign(c, l, t, pc_or_sc)
-                        if not feasible: continue
-
-                        current_cost = self.cost
-                        if bestAssignment.cost > current_cost or (
-                                bestAssignment.cost == current_cost and random.random() > 0.5):
-                            bestAssignment.location = l
-                            bestAssignment.city = c
-                            bestAssignment.type = t
-                            bestAssignment.is_primary = True if pc_or_sc == 'primary' else False
-                            bestAssignment.cost = self.cost
-
-                        self.unassign(c, l, t, pc_or_sc)
-
-        return bestAssignment
 
     def __str__(self):
         result_str = f'Solution found with cost {self.cost}\n'

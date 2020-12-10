@@ -1,3 +1,9 @@
+"""
+AMMM Project
+Type class.
+Eloy Marín, Pablo Pazos
+"""
+
 class Type(object):
     def __init__(self, d_city, cap, cost, id):
         self.d_city = d_city

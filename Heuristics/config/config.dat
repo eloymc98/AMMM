@@ -1,7 +1,8 @@
+# file in which the parameters of the Solver must be specified
 # --- Common specific parameters ------------------------------------------------------------------------------
 inputDataFile        = data/big_test.dat;        # Input DAT file
 solutionFile         = solutions/big_test.sol;   # Output DAT file (solution)
-solver               = GRASP;                  # Supported solvers: Greedy / GRASP
+solver               = Greedy;                  # Supported solvers: Greedy / GRASP
 maxExecTime          = 300;                      # Maximum execution time in seconds
 verbose              = True;                    # Verbose mode?
 
@@ -14,5 +15,5 @@ alpha                = 0.5;                 # Alpha parameter for the GRASP solv
 
 # --- Local Search specific parameters ------------------------------------------------------------------------
 localSearch          = True;                # Enable local search?
-neighborhoodStrategy = Reassignment;        # Supported Neighborhoods: TaskExchange
+neighborhoodStrategy = Reassignment;        # Supported Neighborhoods: Reassignment
 policy               = BestImprovement;    # Supported Policies: FirstImprovement / BestImprovement

@@ -14,7 +14,8 @@ nTypes = 3;
 min_d_city = 1;
 max_d_city = 20;
 
-# Range of population capacity of the logistic center type
+# Range of population of the city.
+# It also tune the range of population accepted by a logistic center type
 min_cap = 1;
 max_cap = 40;
 

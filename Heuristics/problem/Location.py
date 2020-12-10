@@ -1,3 +1,9 @@
+"""
+AMMM Project
+Location class.
+Eloy Marín, Pablo Pazos
+"""
+
 class Location(object):
     def __init__(self, x, y, id):
         self.x = x

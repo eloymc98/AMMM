@@ -1,30 +1,20 @@
 """
-AMMM Lab Heuristics
+AMMM Project
 Representation of a problem instance
-Copyright 2020 Luis Velasco.
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
+Eloy Marín, Pablo Pazos
+File given Luis Velasco and under its copyright policy
+Modified for project purposes
 """
+
 import math
 
-from Heuristics.problem.LogisticCenter import LogisticCenter
 from Heuristics.problem.City import City
 from Heuristics.problem.Location import Location
 from Heuristics.problem.solution import Solution
 from Heuristics.problem.Type import Type
 
-
+# function that compute the euclidean distance between 2 points
+# It is used to check distance constraints
 def distance(l1, l2, min_dist=None):
     d = math.sqrt(math.pow(l1.getX() - l2.getX(), 2) + math.pow(l1.getY() - l2.getY(), 2))
     if min_dist is not None:
@@ -52,16 +42,19 @@ class Instance(object):
 
         d_center = inputData.d_center
 
+        # Create Location objects
         self.locations = [None] * nLocations
         for i, location in enumerate(posLocations):
             self.locations[i] = Location(location[0], location[1], i)
 
+        # Create City objects
         self.cities = [None] * nCities
         for i in range(nCities):
             x = posCities[i][0]
             y = posCities[i][1]
             self.cities[i] = City(Location(x, y, i), p[i])
 
+        # Create Type objects
         self.types = [None] * nTypes
         for i in range(nTypes):
             self.types[i] = Type(d_city[i], cap[i], cost[i], i)
@@ -113,5 +106,4 @@ class Instance(object):
         return solution
 
     def checkInstance(self):
-        # TODO: implement if necessary
         return True

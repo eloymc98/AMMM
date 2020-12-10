@@ -1,20 +1,9 @@
 """
-AMMM Lab Heuristics
-Local Search algorithm
-Copyright 2020 Luis Velasco.
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
+AMMM Project
+Local Search Algorithm
+Eloy Marín, Pablo Pazos
+File given Luis Velasco and under its copyright policy
+Modified for project purposes
 """
 
 import copy
@@ -23,7 +12,6 @@ from Heuristics.solver import _Solver
 from AMMMGlobals import AMMMException
 
 
-# A change in a solution in the form: move taskId from curCPUId to newCPUId.
 # This class is used to perform sets of modifications.
 # A new solution can be created based on an existing solution and a list of
 # changes using the createNeighborSolution(solution, moves) function.
@@ -38,7 +26,7 @@ class Move(object):
         return f'City {self.c.getId()} {self.pc_or_sc}: Location {self.old_l.getId()} -> Location {self.new_l.getId()}'
 
 
-# Implementation of a local search using two neighborhoods and two different policies.
+# Implementation of a local search using two neighborhoods and oen policy.
 class LocalSearch(_Solver):
     def __init__(self, config, instance):
         self.enabled = config.localSearch
@@ -48,8 +36,6 @@ class LocalSearch(_Solver):
         super().__init__(config, instance)
 
     def createNeighborSolution(self, solution, moves,old_l_new_t):
-        # unassign the tasks specified in changes
-        # and reassign them to the new CPUs
         newSolution = copy.deepcopy(solution)
 
         for move in moves:
@@ -64,7 +50,7 @@ class LocalSearch(_Solver):
 
         return newSolution
 
-    def get_best_feasible_type(self, solution, city, pc_or_sc, old_location):
+    def get_best_feasible_type(self, solution, city, old_location):
         feasible_types = []
         for t in solution.types:
             population = 0
@@ -113,7 +99,7 @@ class LocalSearch(_Solver):
             else:
                 # If old location type can be changed for another one with lower cost, compute
                 # new cost
-                new_type = self.get_best_feasible_type(solution, city, pc_or_sc, old_location)
+                new_type = self.get_best_feasible_type(solution, city, old_location)
                 assignment_cost += new_type.get_cost() - solution.locations_used[old_location.getId()].get_cost()
                 if new_type.get_cost() - solution.locations_used[old_location.getId()].get_cost() != 0:
                     return assignment_cost, new_type
@@ -158,7 +144,8 @@ class LocalSearch(_Solver):
 
         # For best improvement policy it does not make sense to sort the locations since all of them must be explored.
         # However, for first improvement, we can start by the tasks assigned to the more loaded CPUs.
-        if self.policy == 'BestImprovement': return assignments
+        if self.policy == 'BestImprovement':
+            return assignments
 
         # Sort assignments by the load of the assigned CPU in descending order.
         sorted_assignments = sorted(assignments, key=lambda x: x[2], reverse=True)
@@ -220,49 +207,8 @@ class LocalSearch(_Solver):
 
         return bestNeighbor
 
-    def exploreExchange(self, solution):
-
-        curHighestLoad = solution.getFitness()
-        bestNeighbor = solution
-
-        # For the Exchange neighborhood and first improvement policy, try exchanging
-        # two tasks assigned to two different CPUs.
-
-        cpusWithAssignments = self.getCPUswithAssignemnts(solution)
-        nCPUs = len(cpusWithAssignments)
-
-        for h in range(0, nCPUs - 1):  # i = 0..(nCPUs-2)
-            CPUPair_h = cpusWithAssignments[h]
-            availCapacityCPU_h = CPUPair_h[2]
-            for th in range(0, len(CPUPair_h[3])):
-                taskPair_h = CPUPair_h[3][th]
-                for l in range(1, nCPUs):  # i = 1..(nCPUs-1)
-                    CPUPair_l = cpusWithAssignments[l]
-                    availCapacityCPU_l = CPUPair_l[2]
-                    for tl in range(0, len(CPUPair_l[3])):
-                        taskPair_l = CPUPair_l[3][tl]
-                        if (taskPair_l[1] - taskPair_h[1]) <= availCapacityCPU_h and \
-                                (taskPair_h[1] - taskPair_l[1]) <= availCapacityCPU_l and \
-                                (taskPair_l[1] != taskPair_h[1]) and \
-                                (availCapacityCPU_l + taskPair_l[1] - taskPair_h[1]) != availCapacityCPU_h:
-                            moves = [Move(taskPair_h[0], CPUPair_h[0], CPUPair_l[0]),
-                                     Move(taskPair_l[0], CPUPair_l[0], CPUPair_h[0])]
-                            neighborHighestLoad = self.evaluateNeighbor(solution, moves)
-                            if neighborHighestLoad <= curHighestLoad:
-                                neighbor = self.createNeighborSolution(solution, moves)
-                                if neighbor is None:
-                                    raise AMMMException('[exploreExchange] No neighbouring solution could be created')
-                                if self.policy == 'FirstImprovement':
-                                    return neighbor
-                                else:
-                                    bestNeighbor = neighbor
-                                    curHighestLoad = neighborHighestLoad
-        return bestNeighbor
-
     def exploreNeighborhood(self, solution):
-        if self.nhStrategy == 'TaskExchange':
-            return self.exploreExchange(solution)
-        elif self.nhStrategy == 'Reassignment':
+        if self.nhStrategy == 'Reassignment':
             return self.exploreReassignment(solution)
         else:
             raise AMMMException('Unsupported NeighborhoodStrategy(%s)' % self.nhStrategy)
@@ -272,7 +218,8 @@ class LocalSearch(_Solver):
         if initialSolution is None:
             raise AMMMException('[local search] No solution could be retrieved')
 
-        if not initialSolution.isFeasible(): return initialSolution
+        if not initialSolution.isFeasible():
+            return initialSolution
         self.startTime = kwargs.get('startTime', None)
         endTime = kwargs.get('endTime', None)
 
@@ -284,11 +231,12 @@ class LocalSearch(_Solver):
         while time.time() < endTime:
             iterations += 1
             neighbor = self.exploreNeighborhood(incumbent)
-            if neighbor is None: break
+            if neighbor is None:
+                break
             neighborFitness = neighbor.cost
-            if incumbentFitness <= neighborFitness: break
+            if incumbentFitness <= neighborFitness:
+                break
             incumbent = neighbor
             incumbentFitness = neighborFitness
-            print('Successful Local Search!')
 
         return incumbent

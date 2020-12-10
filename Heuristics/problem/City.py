@@ -1,3 +1,10 @@
+"""
+AMMM Project
+City class.
+Eloy Marín, Pablo Pazos
+"""
+
+
 class City(object):
     def __init__(self, location, population):
         self.location = location
