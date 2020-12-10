@@ -197,7 +197,16 @@ class Solution(_Solution):
             del self.locations_used[location.getId()]
 
         if len(self.cities_served_per_each_location[location.getId()]) > 1:
-            self.cities_served_per_each_location[location.getId()].remove((city, pc_or_sc))
+            try:
+                self.cities_served_per_each_location[location.getId()].remove((city, pc_or_sc))
+            except ValueError:
+                index_to_delete = None
+                for i, v in enumerate(self.cities_served_per_each_location[location.getId()]):
+                    if v[0].getId() == city.getId():
+                        index_to_delete = i
+                        break
+                if index_to_delete is not None:
+                    del self.cities_served_per_each_location[location.getId()][index_to_delete]
         else:
             del self.cities_served_per_each_location[location.getId()]
 
@@ -210,6 +219,33 @@ class Solution(_Solution):
             self.usedPopulationPerCenter[location.getId()] -= population
 
         self.cost -= assignment_cost
+        return True
+
+    def change_location_type(self, location, t):
+        population = self.usedPopulationPerCenter[location.getId()]
+        infeasible = False
+        for value in self.cities_served_per_each_location[location.getId()]:
+            # Check if new type would respect distance constraints of other cities
+            if value[1] == 'primary' and self.cl_distances[value[0].getId()][location.getId()] > t.get_d_city():
+                infeasible = True
+                break
+            elif value[1] == 'secondary' and self.cl_distances[value[0].getId()][location.getId()] > 3 * t.get_d_city():
+                infeasible = True
+                break
+
+        # Check if new type would have capacity for other served cities
+        if t.get_capacity() < population:
+            infeasible = True
+
+        if infeasible:
+            return False
+
+        assignment_cost = 0
+        if self.locations_used[location.getId()].get_id() != t.get_id():
+            assignment_cost = t.get_cost() - self.locations_used[location.getId()].get_cost()
+            self.locations_used[location.getId()] = t
+        self.cost += assignment_cost
+
         return True
 
     def findFeasibleAssignments(self):

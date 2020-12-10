@@ -47,7 +47,7 @@ class LocalSearch(_Solver):
         self.maxExecTime = config.maxExecTime
         super().__init__(config, instance)
 
-    def createNeighborSolution(self, solution, moves):
+    def createNeighborSolution(self, solution, moves,old_l_new_t):
         # unassign the tasks specified in changes
         # and reassign them to the new CPUs
         newSolution = copy.deepcopy(solution)
@@ -58,6 +58,8 @@ class LocalSearch(_Solver):
         for move in moves:
             feasible = newSolution.assign(move.c, move.new_l, solution.locations_used[move.new_l.getId()],
                                           move.pc_or_sc)
+            if old_l_new_t is not None:
+                feasible = newSolution.change_location_type(move.old_l, old_l_new_t)
             if not feasible: return None
 
         return newSolution
@@ -114,9 +116,9 @@ class LocalSearch(_Solver):
                 new_type = self.get_best_feasible_type(solution, city, pc_or_sc, old_location)
                 assignment_cost += new_type.get_cost() - solution.locations_used[old_location.getId()].get_cost()
                 if new_type.get_cost() - solution.locations_used[old_location.getId()].get_cost() != 0:
-                    print('ole')
+                    return assignment_cost, new_type
 
-        return assignment_cost
+        return assignment_cost, None
 
     def getCPUswithAssignemnts(self, solution):
         tasks = solution.tasks
@@ -162,70 +164,6 @@ class LocalSearch(_Solver):
         sorted_assignments = sorted(assignments, key=lambda x: x[2], reverse=True)
         return sorted_assignments
 
-    def is_feasible_to_reassign(self, solution, cities_centers, city, new_location, type, pc_or_sc):
-        # If new location already serves the city, is not feasible
-        if pc_or_sc == 'primary' and cities_centers[city.getId()]['secondary'] == new_location:
-            return False
-        elif pc_or_sc == 'secondary' and cities_centers[city.getId()]['primary'] == new_location:
-            return False
-
-        if pc_or_sc == 'primary' and solution.cl_distances[city.getId()][new_location] > type.get_d_city():
-            # Check if we want to make this location-type primary but distance constraint is not fulfilled
-            return False
-        elif pc_or_sc == 'secondary' and solution.cl_distances[city.getId()][new_location] > 3 * type.get_d_city():
-            # Check if we want to make this location-type secondary but distance constraint is not fulfilled
-            return False
-
-        old_location = cities_centers[city.getId()][pc_or_sc]
-        if len(solution.cities_served_per_each_location[old_location]) == 1:
-            # check if old_location was only serving this city and thus, compatible locations
-            # are different now
-            flag = True
-            for k in solution.locations_used.keys():
-                if k == old_location:
-                    continue
-                if new_location not in solution.compatible_locations[k]:
-                    flag = False
-
-            if new_location in solution.locations_used.keys():
-                flag = True
-            if not flag:
-                return False
-        else:
-            # Check if location is compatible with locations already used
-            flag = True
-            for k in solution.locations_used.keys():
-                if new_location not in solution.compatible_locations[k]:
-                    flag = False
-            if new_location in solution.locations_used.keys():
-                flag = True
-            if not flag:
-                return False
-
-        # Check if we can fit needed population
-        if solution.usedPopulationPerCenter.get(new_location) is not None:
-            if pc_or_sc == 'primary' and type.get_capacity() - solution.usedPopulationPerCenter[
-                new_location] < city.getPopulation():
-                return False
-            elif pc_or_sc == 'secondary' and type.get_capacity() - solution.usedPopulationPerCenter[
-                new_location] < 0.1 * city.getPopulation():
-                return False
-
-        # If the location was previously used and we change its type, we have to respect the distances of the cities
-        # that it serves as primary/secondary and its capacity
-        if solution.locations_used.get(new_location) is not None:
-            old_type = solution.locations_used[new_location]
-            if old_type.get_id() != type.get_id():
-                for value in solution.cities_served_per_each_location[new_location]:
-                    if value[1] == 'primary' and solution.cl_distances[value[0].getId()][
-                        new_location] > type.get_d_city():
-                        return False
-                    elif value[1] == 'secondary' and solution.cl_distances[value[0].getId()][
-                        new_location] > 3 * type.get_d_city():
-                        return False
-
-        return True
-
     def reassignment_is_feasible(self, solution, city, pc_or_sc, new_location):
         # If new location already serves the city, is not feasible
         if pc_or_sc == 'primary' and solution.cities_centers[city.getId()]['secondary'] == new_location.getId():
@@ -270,9 +208,9 @@ class LocalSearch(_Solver):
                     new_location = sortedAssignments[j][0]
                     if self.reassignment_is_feasible(solution, v[0], v[1], new_location):
                         moves = [Move(v[0], v[1], location, new_location)]
-                        neighbor_cost = self.evaluateNeighbor(solution, moves)
+                        neighbor_cost, old_l_new_t = self.evaluateNeighbor(solution, moves)
                         if neighbor_cost < current_cost:
-                            neighbor = self.createNeighborSolution(solution, moves)
+                            neighbor = self.createNeighborSolution(solution, moves,old_l_new_t)
                             if neighbor is None: continue
                             if self.policy == 'FirstImprovement':
                                 return neighbor
