@@ -4,6 +4,8 @@
 		<config default="true" name="cfg1" category="opl">
 			<ref name="project.template.mod" type="model">
 			</ref>
+			<ref name="instance_0.dat" type="data">
+			</ref>
 		</config>
 	</configs>
 	

@@ -63,7 +63,7 @@ class InstanceGenerator(object):
             maxPopulationCity = max(p)
             for t in range(nTypes):
                 d_city[t] = random.randint(min_d_city, max_d_city)
-                cap[t] = random.randint(maxPopulationCity / 3, max_cap * 4)
+                cap[t] = random.randint(maxPopulationCity // 3, maxPopulationCity * (t+1))
                 cost[t] = random.randint(min_cost, max_cost)
 
             d_center = random.uniform(min_pos, max_pos / 2)
