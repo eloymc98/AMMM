@@ -1,20 +1,9 @@
 """
-AMMM P2 Instance Generator v2.0
+AMMM Project Instance Generator
 Instance Generator class.
-Copyright 2020 Luis Velasco.
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
+Eloy Marín, Pablo Pazos
+File given Luis Velasco and under its copyright policy
+Modified for project purposes
 """
 
 import os, random
@@ -23,11 +12,11 @@ from AMMMGlobals import AMMMException
 
 class InstanceGenerator(object):
     # Generate instances based on read configuration.
-
     def __init__(self, config):
         self.config = config
 
     def generate(self):
+        # Read ./config/config.dat with tune parameters
         instancesDirectory = self.config.instancesDirectory
         fileNamePrefix = self.config.fileNamePrefix
         fileNameExtension = self.config.fileNameExtension
@@ -78,31 +67,41 @@ class InstanceGenerator(object):
 
             d_center = random.uniform(min_pos, max_pos / 2)
 
+            # Order arrays in order to get type with sense
+            # The more cost, the better capacity and working distance
+            d_city.sort()
+            cap.sort()
+            cost.sort()
+
             fInstance.write('nLocations = %d;\n' % nLocations)
             fInstance.write('nCities = %d;\n' % nCities)
             fInstance.write('nTypes = %d;\n' % nTypes)
             fInstance.write('\n')
 
-            # translate vector of floats into vector of strings and
+            # translate vector of integers into vector of strings and
             # concatenate that strings separating them by a single space character
+            # in order to keep the data file characteristics
 
             fInstance.write('p = [%s];\n' % (' '.join(map(str, p))))
             fInstance.write('posCities = [%s];\n' % (' '.join(map(str, posCities))))
             fInstance.write('posLocations = [%s];\n' % (' '.join(map(str, posLocations))))
             fInstance.write('\n')
+
             fInstance.write('d_city = [%s];\n' % (' '.join(map(str, d_city))))
             fInstance.write('cap = [%s];\n' % (' '.join(map(str, cap))))
             fInstance.write('cost = [%s];\n' % (' '.join(map(str, cost))))
             fInstance.write('\n')
+
             fInstance.write('d_center = %s;\n' % "{:.1f}".format(d_center))
 
             fInstance.close()
 
-    def create_locations(self, min_pos, max_pos, posLocations):
+    # recursive function that guarantees no repetitions in the array
+    def create_locations(self, min_pos, max_pos, locations):
         value1 = random.randint(min_pos, max_pos)
         value2 = random.randint(min_pos, max_pos)
         newValue = '[%d %d]' % (value1, value2)
-        if newValue in posLocations:
-            return self.create_locations(min_pos, max_pos, posLocations)
+        if newValue in locations:
+            return self.create_locations(min_pos, max_pos, locations)
         else:
             return newValue

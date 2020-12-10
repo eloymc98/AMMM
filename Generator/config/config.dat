@@ -1,18 +1,23 @@
 # file name: ../AMMMLabHeuristics/data/instance_XX.dat
+# file in which the parameters of the Instance Generator must be specified
 instancesDirectory = output;
 fileNamePrefix = small;
 fileNameExtension = dat;
 numInstances = 1;
 
+# We recommend the ratio 5/8 (nLocations/nCities)
 nLocations = 20;
 nCities = 32;
 nTypes = 3;
 
+# Range of the working distance of the logistic center type
 min_d_city = 1;
 max_d_city = 20;
 
+# Range of population capacity of the logistic center type
 min_cap = 1;
 max_cap = 40;
 
+# Range of the cost of the logistic center type
 min_cost = 10;
 max_cost = 50;
