@@ -84,7 +84,7 @@ class Solver_Greedy(_Solver):
             solution = localSearch.solve(solution=solution, startTime=self.startTime, endTime=endTime)
 
         self.elapsedEvalTime = time.time() - self.startTime
-        self.writeLogLine(solution.cost, 2)
+        self.writeLogLine(solution.cost, 1)
         self.numSolutionsConstructed = 1
 
         self.printPerformance()

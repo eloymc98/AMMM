@@ -1,7 +1,7 @@
 # file in which the parameters of the Solver must be specified
 # --- Common specific parameters ------------------------------------------------------------------------------
-inputDataFile        = data/instance_1.dat;        # Input DAT file
-solutionFile         = solutions/instance_1.sol;   # Output DAT file (solution)
+inputDataFile        = data/alpha_tuning2.dat;        # Input DAT file
+solutionFile         = solutions/alpha_tuning2.sol;   # Output DAT file (solution)
 solver               = GRASP;                  # Supported solvers: Greedy / GRASP
 maxExecTime          = 300;                      # Maximum execution time in seconds
 verbose              = True;                    # Verbose mode?
@@ -11,9 +11,9 @@ verbose              = True;                    # Verbose mode?
 
 # --- GRASP constructive specific parameters ------------------------------------------------------------------
 # Ignored if solver is not GRASP.
-alpha                = 0.5;                 # Alpha parameter for the GRASP solver.
+alpha                = 1;                 # Alpha parameter for the GRASP solver.
 
 # --- Local Search specific parameters ------------------------------------------------------------------------
-localSearch          = True;                # Enable local search?
+localSearch          = False;                # Enable local search?
 neighborhoodStrategy = Reassignment;        # Supported Neighborhoods: Reassignment
 policy               = BestImprovement;    # Supported Policies: FirstImprovement / BestImprovement

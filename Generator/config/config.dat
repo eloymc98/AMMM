@@ -6,9 +6,9 @@ fileNameExtension = dat;
 numInstances = 1;
 
 # We recommend the ratio 5/8 (nLocations/nCities)
-nLocations = 25;
-nCities = 50;
-nTypes = 6;
+nLocations = 20;
+nCities = 30;
+nTypes = 5;
 
 # Range of the working distance of the logistic center type
 min_d_city = 1;
