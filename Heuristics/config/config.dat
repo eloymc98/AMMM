@@ -1,7 +1,7 @@
 # file in which the parameters of the Solver must be specified
 # --- Common specific parameters ------------------------------------------------------------------------------
-inputDataFile        = data/instance_3.dat;        # Input DAT file
-solutionFile         = solutions/instance_3.sol;   # Output DAT file (solution)
+inputDataFile        = data/instance_1.dat;        # Input DAT file
+solutionFile         = solutions/instance_1.sol;   # Output DAT file (solution)
 solver               = GRASP;                  # Supported solvers: Greedy / GRASP
 maxExecTime          = 300;                      # Maximum execution time in seconds
 verbose              = True;                    # Verbose mode?

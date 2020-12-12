@@ -103,12 +103,18 @@ class Solution(_Solution):
             if not flag:
                 return False
 
+        # Check if population fits in center type
         if self.usedPopulationPerCenter.get(location.getId()) is not None:
             if pc_or_sc == 'primary' and type.get_capacity() - self.usedPopulationPerCenter[
                 location.getId()] < city.getPopulation():
                 return False
             elif pc_or_sc == 'secondary' and type.get_capacity() - self.usedPopulationPerCenter[
                 location.getId()] < 0.1 * city.getPopulation():
+                return False
+        else:
+            if pc_or_sc == 'primary' and type.get_capacity() < city.getPopulation():
+                return False
+            elif pc_or_sc == 'secondary' and type.get_capacity() < 0.1 * city.getPopulation():
                 return False
 
         # If we change center type, we have to respect the distances of the cities that it serves as primary/secondary
