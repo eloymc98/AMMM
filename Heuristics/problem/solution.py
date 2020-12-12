@@ -34,7 +34,7 @@ class Assignment(object):
 class Solution(_Solution):
     def __init__(self, cities, locations, types, compatible_locations, cl_distances):
         self.cost = 0.0
-        self.cities = cities
+        self.cities = copy.deepcopy(cities)
         self.locations = locations
         self.types = types
         self.compatible_locations = compatible_locations
