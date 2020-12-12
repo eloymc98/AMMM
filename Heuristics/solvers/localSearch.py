@@ -106,29 +106,6 @@ class LocalSearch(_Solver):
 
         return assignment_cost, None
 
-    def getCPUswithAssignemnts(self, solution):
-        tasks = solution.tasks
-        cpus = solution.cpus
-
-        # create vector of assignments <task, cpu>
-        cpusWithAssignments = []
-        for cpu in cpus:
-            cpuId = cpu.getId()
-            load = solution.loadPerCPUId[cpuId]
-            assignedTasks = solution.cpuIdToListTaskId[cpuId]
-            if assignedTasks is None: assignedTasks = []
-            assignedTasksWithResources = []
-            for taskId in assignedTasks:
-                taskPair = (taskId, tasks[taskId].getTotalResources())
-                assignedTasksWithResources.append(taskPair)
-            assignedTasksWithResources.sort(key=lambda task: task[1], reverse=True)
-            cpuWithAssignments = (cpuId, load, solution.availCapacityPerCPUId[cpuId], assignedTasksWithResources)
-            cpusWithAssignments.append(cpuWithAssignments)
-
-        # Sort assignments by the load of the assigned CPU in descending order.
-        cpusWithAssignments.sort(key=lambda cpuWithAssignment: cpuWithAssignment[1], reverse=True)
-        return cpusWithAssignments
-
     def getLocationAssignmentsSortedByCost(self, solution):
         locations_used = solution.locations_used
         locations = solution.locations

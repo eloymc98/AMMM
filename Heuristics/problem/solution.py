@@ -50,6 +50,10 @@ class Solution(_Solution):
         self.cities_served_per_each_location = {}
         self.complete = False
 
+        self.cities_not_assigned = {}
+        for c in cities:
+            self.cities_not_assigned[c.getId()] = c
+        # self.possible_locations_to_explore = copy.deepcopy(compatible_locations)
         super().__init__()
 
     # Update the total cost of the solution
@@ -70,11 +74,6 @@ class Solution(_Solution):
                 self.complete = True
 
     def isFeasibleToAssignCenterToCity(self, city, location, type, pc_or_sc):
-        # Check if location is already used with another type
-        # if len(self.locations_used) > 0:
-        #     for l in self.locations_used:
-        #         if location.getId() == l[0] and type.get_id() != l[1]:
-        #             return False
         if self.cities_centers.get(city.getId()) is not None:
             if self.cities_centers[city.getId()].get(pc_or_sc) is not None:
                 # Check if this city has already been a assigned a primary/secondary center
@@ -105,9 +104,11 @@ class Solution(_Solution):
                 return False
 
         if self.usedPopulationPerCenter.get(location.getId()) is not None:
-            if pc_or_sc == 'primary' and type.get_capacity() - self.usedPopulationPerCenter[location.getId()] < city.getPopulation():
+            if pc_or_sc == 'primary' and type.get_capacity() - self.usedPopulationPerCenter[
+                location.getId()] < city.getPopulation():
                 return False
-            elif pc_or_sc == 'secondary' and type.get_capacity() - self.usedPopulationPerCenter[location.getId()] < 0.1 * city.getPopulation():
+            elif pc_or_sc == 'secondary' and type.get_capacity() - self.usedPopulationPerCenter[
+                location.getId()] < 0.1 * city.getPopulation():
                 return False
 
         # If we change center type, we have to respect the distances of the cities that it serves as primary/secondary
@@ -116,15 +117,17 @@ class Solution(_Solution):
             old_type = self.locations_used[location.getId()]
             if old_type.get_id() != type.get_id():
                 for value in self.cities_served_per_each_location[location.getId()]:
-                    if value[1] == 'primary' and self.cl_distances[value[0].getId()][location.getId()] > type.get_d_city():
+                    if value[1] == 'primary' and self.cl_distances[value[0].getId()][
+                        location.getId()] > type.get_d_city():
                         return False
-                    elif value[1] == 'secondary' and self.cl_distances[value[0].getId()][location.getId()] > 3 * type.get_d_city():
+                    elif value[1] == 'secondary' and self.cl_distances[value[0].getId()][
+                        location.getId()] > 3 * type.get_d_city():
                         return False
 
         return True
 
-    # Check if feasible to unassing center from city
     def isFeasibleToUnassignCenterFromCity(self, city, location, type, pc_or_sc):
+        # Check if feasible to unassing center from city
         if self.locations_used.get(location.getId()) is None:
             return False
         if self.locations_used[location.getId()].get_id() != type.get_id():
@@ -166,6 +169,9 @@ class Solution(_Solution):
 
         if check_completeness:
             self.is_complete()
+            if self.cities_centers[city.getId()].get('primary') is not None and self.cities_centers[city.getId()].get(
+                    'secondary') is not None:
+                del self.cities_not_assigned[city.getId()]
         return True
 
     # unassign one center to a city
@@ -238,7 +244,7 @@ class Solution(_Solution):
     # find all feasible assigment and return a list
     def findFeasibleAssignments(self):
         feasibleAssignments = []
-        for c in self.cities:
+        for c in self.cities_not_assigned.values():
             for l in self.locations:
                 for t in self.types:
                     for pc_or_sc in ['primary', 'secondary']:

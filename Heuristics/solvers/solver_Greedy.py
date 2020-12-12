@@ -7,6 +7,8 @@ Modified for project purposes
 """
 
 import random, time
+
+from AMMMGlobals import AMMMException
 from Heuristics.solver import _Solver
 from Heuristics.solvers.localSearch import LocalSearch
 
@@ -42,9 +44,9 @@ class Solver_Greedy(_Solver):
 
             # no candidate assignments => no feasible assignment found
             if not candidates:
-                print('Greedy construction is infeasible. Please try again!')
                 solution.makeInfeasible()
-                break
+                raise AMMMException('Greedy construction is infeasible. Please try again!')
+                # break
 
             # assign the assignment with min cost
             candidate_with_min_cost = self._selectCandidate(candidates)
