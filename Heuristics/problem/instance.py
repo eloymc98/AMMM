@@ -106,4 +106,8 @@ class Instance(object):
         return solution
 
     def checkInstance(self):
-        return True
+        for v in self.distance_l1l2:
+            for j in v:
+                if j is not None:
+                    return True
+        return False
